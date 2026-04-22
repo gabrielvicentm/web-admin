@@ -42,7 +42,7 @@ function getLoginErrorMessage(error: unknown) {
     if (error.response?.status === 404) {
       return 'A rota de login nao foi encontrada no backend. Confira se o endpoint correto e /auth/login.'
     }
-
+1
     if (error.code === 'ERR_NETWORK') {
       return 'Nao foi possivel conectar ao backend em localhost:8081.'
     }

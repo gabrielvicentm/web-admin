@@ -66,6 +66,8 @@ const navigationItems: DashboardNavItem[] = [
       { label: 'Novo motorista', icon: PlusIcon, to: '/dashboard/motoristas/novo' },
     ],
   },
+  { label: 'Clientes', icon: UsersIcon, to: '/dashboard/clientes/listar' },
+  { label: 'Tipos de carga', icon: ReportIcon, to: '/dashboard/tipos-carga/listar' },
   { label: 'Manutencao', icon: WrenchIcon, to: '/dashboard/manutencao' },
   { label: 'Abastecimentos', icon: FuelIcon, to: '/dashboard/abastecimentos' },
   { label: 'Ocorrencias', icon: AlertIcon, to: '/dashboard/ocorrencias' },
@@ -80,6 +82,10 @@ function getExpandedGroups(pathname: string) {
     Funcionarios: pathname.startsWith('/dashboard/funcionarios'),
     Motoristas: pathname.startsWith('/dashboard/motoristas'),
   }
+}
+
+function isSidebarRouteActive(pathname: string, to: string) {
+  return pathname === to || pathname.startsWith(`${to}/`)
 }
 
 export function DashboardPage() {
@@ -124,7 +130,7 @@ export function DashboardPage() {
         <nav className="dashboard-sidebar__nav" aria-label="Navegacao principal">
           {navigationItems.map((item) => {
             const isGrouped = Boolean(item.children?.length)
-            const isGroupActive = item.children?.some((child) => location.pathname === child.to) ?? false
+            const isGroupActive = item.children?.some((child) => isSidebarRouteActive(location.pathname, child.to)) ?? false
 
             if (!isGrouped && item.to) {
               const Icon = item.icon
@@ -171,8 +177,10 @@ export function DashboardPage() {
                       <NavLink
                         key={child.to}
                         to={child.to}
-                        className={({ isActive }) =>
-                          `dashboard-sidebar__sublink ${isActive ? 'dashboard-sidebar__sublink--active' : ''}`
+                        className={() =>
+                          `dashboard-sidebar__sublink ${
+                            isSidebarRouteActive(location.pathname, child.to) ? 'dashboard-sidebar__sublink--active' : ''
+                          }`
                         }
                         onClick={() => setIsSidebarOpen(false)}
                       >

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import logoImage from '../../assets/logo.png'
 
 type AdminLoginFormValues = {
   email: string
@@ -39,11 +40,24 @@ export function AdminLoginForm({ onSubmit, errorMessage = '' }: AdminLoginFormPr
 
   return (
     <form className="admin-login-form" onSubmit={handleSubmit}>
+      <div className="admin-login-form__brand">
+        <img className="admin-login-form__brand-logo" src={logoImage} alt="Logo da Transportadora Gusmao" />
+        <div>
+          <strong className="admin-login-form__brand-title">Transportadora Gusmao</strong>
+          <span className="admin-login-form__brand-subtitle">Acesso ao sistema interno</span>
+        </div>
+      </div>
+
+      <div className="admin-login-form__heading">
+        <h1 className="admin-login-form__title">Entrar</h1>
+        <p className="admin-login-form__subtitle">Use suas credenciais administrativas para acessar o dashboard.</p>
+      </div>
+
       <fieldset className="admin-login-form__fieldset">
         <legend className="sr-only">Acesso administrativo</legend>
 
         <div className="admin-login-form__field">
-          <label className="sr-only" htmlFor="email">
+          <label className="admin-login-form__label" htmlFor="email">
             E-mail corporativo
           </label>
           <input
@@ -59,7 +73,7 @@ export function AdminLoginForm({ onSubmit, errorMessage = '' }: AdminLoginFormPr
         </div>
 
         <div className="admin-login-form__field">
-          <label className="sr-only" htmlFor="senha">
+          <label className="admin-login-form__label" htmlFor="senha">
             Senha
           </label>
           <input
@@ -83,9 +97,6 @@ export function AdminLoginForm({ onSubmit, errorMessage = '' }: AdminLoginFormPr
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Entrando...' : 'Entrar'}
-        </button>
-        <button className="admin-login-form__button admin-login-form__button--secondary" type="button">
-          Recuperar senha
         </button>
       </div>
     </form>

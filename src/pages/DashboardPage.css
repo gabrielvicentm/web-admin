@@ -618,3 +618,530 @@ body {
     text-align: center;
   }
 }
+
+.entity-page {
+  display: grid;
+  gap: 22px;
+}
+
+.entity-page__hero,
+.entity-toolbar,
+.entity-card {
+  border: 1px solid var(--dashboard-border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  box-shadow: var(--dashboard-shadow);
+}
+
+.entity-page__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px;
+}
+
+.entity-page__hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.entity-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.95fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.entity-card {
+  padding: 22px;
+}
+
+.entity-card--table,
+.entity-card--aside {
+  min-height: 100%;
+}
+
+.entity-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.entity-card__header h2 {
+  margin: 0 0 6px;
+  font-size: 1.08rem;
+}
+
+.entity-card__header p {
+  margin: 0;
+  color: var(--dashboard-text-soft);
+}
+
+.entity-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(180px, 0.5fr)) auto;
+  gap: 16px;
+  padding: 18px;
+  align-items: end;
+}
+
+.entity-toolbar--compact {
+  grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.5fr) auto;
+}
+
+.entity-toolbar__field,
+.entity-field {
+  display: grid;
+  gap: 8px;
+}
+
+.entity-toolbar__field--grow {
+  min-width: 0;
+}
+
+.entity-toolbar__field label,
+.entity-field span {
+  color: var(--dashboard-text-soft);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.entity-toolbar__field input,
+.entity-toolbar__field select,
+.entity-field input,
+.entity-field select,
+.entity-field textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid rgba(132, 164, 212, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.entity-field textarea {
+  min-height: 160px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.entity-toolbar__field input:focus,
+.entity-toolbar__field select:focus,
+.entity-field input:focus,
+.entity-field select:focus,
+.entity-field textarea:focus {
+  border-color: rgba(76, 141, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(76, 141, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.entity-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.entity-action:hover {
+  transform: translateY(-1px);
+}
+
+.entity-action--primary {
+  color: #f4f8ff;
+  background: linear-gradient(135deg, #2058a3, #3174d3);
+}
+
+.entity-action--secondary {
+  color: #d4e5ff;
+  background: rgba(76, 141, 255, 0.1);
+  border-color: rgba(76, 141, 255, 0.16);
+}
+
+.entity-action--ghost {
+  color: var(--dashboard-text);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.entity-action--danger {
+  color: #ffd2d2;
+  background: rgba(255, 106, 106, 0.12);
+  border-color: rgba(255, 106, 106, 0.18);
+}
+
+.entity-feedback {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 18px;
+  font-weight: 700;
+}
+
+.entity-feedback--error {
+  background: rgba(255, 106, 106, 0.1);
+  color: #ffc2c2;
+  border: 1px solid rgba(255, 106, 106, 0.16);
+}
+
+.entity-table {
+  display: grid;
+}
+
+.entity-table__head,
+.entity-table__row {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+}
+
+.entity-table__head {
+  padding: 0 0 14px;
+  color: var(--dashboard-text-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.entity-table__head--motoristas,
+.entity-table__row--motoristas {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.1fr) 0.7fr auto;
+}
+
+.entity-table__head--veiculos,
+.entity-table__row--veiculos {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr auto;
+}
+
+.entity-table__head--clientes,
+.entity-table__row--clientes {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.05fr) auto;
+}
+
+.entity-table__head--tipos-carga,
+.entity-table__row--tipos-carga {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) auto;
+}
+
+.entity-table__row {
+  padding: 16px 0;
+  border-top: 1px solid rgba(125, 154, 196, 0.1);
+}
+
+.entity-table__row.is-selected {
+  background: linear-gradient(90deg, rgba(76, 141, 255, 0.06), transparent);
+}
+
+.entity-table__main {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--dashboard-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.entity-table__main--motoristas {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.1fr) 0.7fr;
+}
+
+.entity-table__main--veiculos {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr;
+}
+
+.entity-table__main--clientes {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.05fr);
+}
+
+.entity-table__main--tipos-carga {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+}
+
+.entity-table__main span,
+.entity-table__actions {
+  min-width: 0;
+}
+
+.entity-table__main strong,
+.entity-timeline__item strong,
+.entity-person strong {
+  display: block;
+}
+
+.entity-table__main small,
+.entity-timeline__item span,
+.entity-person small,
+.entity-metric-list span,
+.entity-empty-inline {
+  color: var(--dashboard-text-soft);
+}
+
+.entity-table__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.entity-person {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.entity-person__avatar,
+.entity-photo-uploader__preview {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(76, 141, 255, 0.24), rgba(31, 210, 138, 0.12));
+  object-fit: cover;
+  border: 1px solid rgba(76, 141, 255, 0.16);
+}
+
+.entity-person__avatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #dce9ff;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.entity-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.entity-status--ativo,
+.entity-status--disponivel {
+  background: rgba(31, 210, 138, 0.14);
+  color: #91f0c5;
+}
+
+.entity-status--inativo {
+  background: rgba(142, 160, 190, 0.14);
+  color: #cad8ee;
+}
+
+.entity-status--ferias,
+.entity-status--em_uso {
+  background: rgba(76, 141, 255, 0.14);
+  color: #9cc0ff;
+}
+
+.entity-status--afastado,
+.entity-status--manutencao {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd389;
+}
+
+.entity-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.entity-pagination button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(76, 141, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(76, 141, 255, 0.1);
+  color: #d6e7ff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.entity-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.entity-empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  border: 1px dashed rgba(125, 154, 196, 0.18);
+  border-radius: 18px;
+  color: var(--dashboard-text-soft);
+  text-align: center;
+  padding: 22px;
+}
+
+.entity-aside,
+.entity-timeline,
+.entity-form {
+  display: grid;
+  gap: 18px;
+}
+
+.entity-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.entity-kpi {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.entity-kpi span {
+  display: block;
+  color: var(--dashboard-text-soft);
+  font-size: 0.84rem;
+}
+
+.entity-kpi strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.3rem;
+}
+
+.entity-timeline {
+  gap: 16px;
+}
+
+.entity-timeline h3 {
+  margin: 0 0 12px;
+  font-size: 0.96rem;
+}
+
+.entity-timeline__item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.entity-timeline__item + .entity-timeline__item {
+  margin-top: 10px;
+}
+
+.entity-metric-list {
+  display: grid;
+  gap: 10px;
+}
+
+.entity-form__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.entity-form__grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.entity-form__grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.entity-form__grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.entity-field--span-2 {
+  grid-column: span 2;
+}
+
+.entity-photo-uploader {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-photo-uploader__preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+}
+
+.entity-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 1240px) {
+  .entity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-form__grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .entity-page__hero,
+  .entity-toolbar {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .entity-toolbar {
+    display: grid;
+  }
+
+  .entity-toolbar__field,
+  .entity-toolbar__field--grow {
+    width: 100%;
+  }
+
+  .entity-table__head {
+    display: none;
+  }
+
+  .entity-table__row--motoristas,
+  .entity-table__row--veiculos {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-table__main {
+    grid-template-columns: 1fr;
+    grid-column: 1;
+  }
+
+  .entity-table__actions {
+    justify-content: flex-start;
+  }
+
+  .entity-form__grid--2,
+  .entity-form__grid--3,
+  .entity-form__grid--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-field--span-2 {
+    grid-column: auto;
+  }
+}
