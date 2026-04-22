@@ -7,13 +7,15 @@ type AdminLoginFormValues = {
 
 type AdminLoginFormProps = {
   onSubmit: (values: AdminLoginFormValues) => Promise<void> | void
+  errorMessage?: string
 }
 
-export function AdminLoginForm({ onSubmit }: AdminLoginFormProps) {
+export function AdminLoginForm({ onSubmit, errorMessage = '' }: AdminLoginFormProps) {
   const [formValues, setFormValues] = useState<AdminLoginFormValues>({
     email: '',
     senha: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target
@@ -26,7 +28,13 @@ export function AdminLoginForm({ onSubmit }: AdminLoginFormProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    await onSubmit(formValues)
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit(formValues)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -68,8 +76,13 @@ export function AdminLoginForm({ onSubmit }: AdminLoginFormProps) {
       </fieldset>
 
       <div className="admin-login-form__actions">
-        <button className="admin-login-form__button admin-login-form__button--primary" type="submit">
-          Entrar
+        {errorMessage ? <p className="admin-login-form__error">{errorMessage}</p> : null}
+        <button
+          className="admin-login-form__button admin-login-form__button--primary"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Entrando...' : 'Entrar'}
         </button>
         <button className="admin-login-form__button admin-login-form__button--secondary" type="button">
           Recuperar senha
