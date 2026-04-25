@@ -821,7 +821,7 @@ body {
 
 .entity-table__head--motoristas,
 .entity-table__row--motoristas {
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.1fr) 0.7fr auto;
+  grid-template-columns: minmax(0, 1.8fr) minmax(180px, 1fr) minmax(200px, 1.05fr) 120px 140px;
 }
 
 .entity-table__head--veiculos,
@@ -861,7 +861,8 @@ body {
 }
 
 .entity-table__main--motoristas {
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.1fr) 0.7fr;
+  grid-template-columns: minmax(0, 1.8fr) minmax(180px, 1fr) minmax(200px, 1.05fr) 120px;
+  grid-column: 1 / span 4;
 }
 
 .entity-table__main--veiculos {
@@ -902,10 +903,44 @@ body {
   flex-wrap: wrap;
 }
 
+.entity-table__actions--motoristas {
+  display: grid;
+  justify-items: stretch;
+  align-content: center;
+  gap: 12px;
+  grid-column: 5;
+}
+
+.entity-table__actions--motoristas > * {
+  justify-content: center;
+}
+
+.entity-table__cell {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.entity-table__cell--status {
+  justify-items: start;
+}
+
 .entity-person {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.entity-person--motorista {
+  align-items: center;
+  gap: 18px;
+}
+
+.entity-person__content {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 
 .entity-person__avatar,
@@ -916,6 +951,13 @@ body {
   background: linear-gradient(135deg, rgba(76, 141, 255, 0.24), rgba(31, 210, 138, 0.12));
   object-fit: cover;
   border: 1px solid rgba(76, 141, 255, 0.16);
+}
+
+.entity-person__avatar--motorista {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  flex-shrink: 0;
 }
 
 .entity-person__avatar--placeholder {
@@ -1133,6 +1175,11 @@ body {
 
   .entity-table__actions {
     justify-content: flex-start;
+  }
+
+  .entity-table__actions--motoristas {
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .entity-form__grid--2,

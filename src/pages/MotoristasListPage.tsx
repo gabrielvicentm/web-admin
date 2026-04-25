@@ -226,30 +226,39 @@ export function MotoristasListPage() {
                       type="button"
                       onClick={() => setSelectedMotorista(item)}
                     >
-                      <span className="entity-person">
-                        {item.foto_url ? (
-                          <img className="entity-person__avatar" src={item.foto_url} alt="" />
-                        ) : (
-                          <span className="entity-person__avatar entity-person__avatar--placeholder">{item.nome.slice(0, 1)}</span>
-                        )}
-                        <span>
-                          <strong>{item.nome}</strong>
-                          <small>CNH {item.tipo_cnh} · validade {item.validade_cnh}</small>
+                      <span className="entity-table__cell entity-table__cell--motorista">
+                        <span className="entity-person entity-person--motorista">
+                          {item.foto_url ? (
+                            <img
+                              className="entity-person__avatar entity-person__avatar--motorista"
+                              src={item.foto_url}
+                              alt={`Foto de ${item.nome}`}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="entity-person__avatar entity-person__avatar--motorista entity-person__avatar--placeholder">
+                              {item.nome.slice(0, 1)}
+                            </span>
+                          )}
+                          <span className="entity-person__content">
+                            <strong>{item.nome}</strong>
+                            <small>CNH {item.tipo_cnh} · validade {item.validade_cnh}</small>
+                          </span>
                         </span>
                       </span>
-                      <span>
+                      <span className="entity-table__cell entity-table__cell--documento">
                         <strong>{item.cpf}</strong>
                         <small>{item.numero_cnh}</small>
                       </span>
-                      <span>
+                      <span className="entity-table__cell entity-table__cell--contato">
                         <strong>{item.telefone}</strong>
                         <small>{item.email}</small>
                       </span>
-                      <span>
+                      <span className="entity-table__cell entity-table__cell--status">
                         <span className={`entity-status entity-status--${item.status}`}>{formatStatusLabel(item.status)}</span>
                       </span>
                     </button>
-                    <span className="entity-table__actions">
+                    <span className="entity-table__actions entity-table__actions--motoristas">
                       <Link className="entity-action entity-action--ghost" to={`/dashboard/motoristas/${item.id}/editar`}>
                         Editar
                       </Link>
