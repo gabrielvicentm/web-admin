@@ -68,7 +68,14 @@ const navigationItems: DashboardNavItem[] = [
   },
   { label: 'Clientes', icon: UsersIcon, to: '/dashboard/clientes/listar' },
   { label: 'Tipos de carga', icon: ReportIcon, to: '/dashboard/tipos-carga/listar' },
-  { label: 'Manutencao', icon: WrenchIcon, to: '/dashboard/manutencao' },
+  {
+    label: 'Manutencoes',
+    icon: WrenchIcon,
+    children: [
+      { label: 'Listar manutencoes', icon: ListIcon, to: '/dashboard/manutencoes/listar' },
+      { label: 'Nova manutencao', icon: PlusIcon, to: '/dashboard/manutencoes/nova' },
+    ],
+  },
   { label: 'Abastecimentos', icon: FuelIcon, to: '/dashboard/abastecimentos' },
   { label: 'Ocorrencias', icon: AlertIcon, to: '/dashboard/ocorrencias' },
   { label: 'Folha de pagamento', icon: PayrollIcon, to: '/dashboard/folha-pagamento' },
@@ -81,6 +88,7 @@ function getExpandedGroups(pathname: string) {
     Veiculos: pathname.startsWith('/dashboard/veiculos'),
     Funcionarios: pathname.startsWith('/dashboard/funcionarios'),
     Motoristas: pathname.startsWith('/dashboard/motoristas'),
+    Manutencoes: pathname.startsWith('/dashboard/manutencoes'),
   }
 }
 

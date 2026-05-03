@@ -59,11 +59,11 @@ export type VeiculoConsumo = {
 }
 
 export type VeiculoHistoricoItem = {
-  id: number
+  id: string
   tipo?: string
   titulo?: string
   descricao?: string
-  data?: string
+  data_evento?: string
   status?: string
 }
 
