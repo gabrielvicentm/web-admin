@@ -1,0 +1,252 @@
+import axios from 'axios'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  manutencaoService,
+  type ManutencaoFormData,
+  type ManutencaoStatus,
+  type ManutencaoTipo,
+} from '../services/manutencaoService'
+import { veiculoService, type VeiculoListItem } from '../services/veiculoService'
+
+const statusOptions: ManutencaoStatus[] = ['agendada', 'em_andamento', 'concluida', 'cancelada']
+const tipoOptions: ManutencaoTipo[] = ['preventiva', 'corretiva', 'revisao']
+
+const initialFormState: ManutencaoFormData = {
+  veiculo_id: '',
+  tipo: 'preventiva',
+  status: 'agendada',
+  descricao: '',
+  oficina: '',
+  km_na_manutencao: '',
+  km_proxima_manutencao: '',
+  data_agendada: '',
+  data_conclusao: '',
+  custo: '',
+  observacoes: '',
+}
+
+function formatLabel(text: string) {
+  return text.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+export function ManutencaoFormPage() {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditing = Boolean(id)
+  const [formData, setFormData] = useState<ManutencaoFormData>(initialFormState)
+  const [veiculos, setVeiculos] = useState<VeiculoListItem[]>([])
+  const [isLoading, setIsLoading] = useState(isEditing)
+  const [isSaving, setIsSaving] = useState(false)
+  const [feedback, setFeedback] = useState('')
+
+  const pageTitle = useMemo(() => (isEditing ? 'Editar manutencao' : 'Nova manutencao'), [isEditing])
+
+  useEffect(() => {
+    async function loadVeiculos() {
+      try {
+        const response = await veiculoService.list({ page: 1, limit: 100 })
+        setVeiculos(response.data)
+      } catch {
+        setVeiculos([])
+      }
+    }
+
+    void loadVeiculos()
+  }, [])
+
+  useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    const manutencaoId = id
+
+    async function loadManutencao() {
+      try {
+        setIsLoading(true)
+        const response = await manutencaoService.getById(manutencaoId)
+        setFormData({ ...initialFormState, ...response.data })
+      } catch {
+        setFeedback('Nao foi possivel carregar os dados da manutencao.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadManutencao()
+  }, [id])
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    const { name, value } = event.target
+    setFormData((current) => ({ ...current, [name]: value }))
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    try {
+      setIsSaving(true)
+      setFeedback('')
+
+      if (isEditing && id) {
+        await manutencaoService.update(id, formData)
+      } else {
+        await manutencaoService.create(formData)
+      }
+
+      navigate('/dashboard/manutencoes/listar', { replace: true })
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const apiMessage =
+          typeof error.response?.data?.message === 'string'
+            ? error.response.data.message
+            : 'Nao foi possivel salvar a manutencao.'
+
+        setFeedback(apiMessage)
+      } else {
+        setFeedback('Nao foi possivel salvar a manutencao. Revise os dados e tente novamente.')
+      }
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return <section className="entity-empty-state">Carregando cadastro da manutencao...</section>
+  }
+
+  return (
+    <section className="entity-page">
+      <header className="entity-page__hero">
+        <div>
+          <p className="dashboard-eyebrow">Cadastro</p>
+          <h1 className="dashboard-title">{pageTitle}</h1>
+          <p className="dashboard-subtitle">
+            Registro administrativo das manutencoes com agenda, oficina, custo e previsao de proxima intervencao.
+          </p>
+        </div>
+        <div className="entity-page__hero-actions">
+          <Link className="entity-action entity-action--secondary" to="/dashboard/manutencoes/listar">
+            Voltar para listagem
+          </Link>
+        </div>
+      </header>
+
+      {feedback ? <p className="entity-feedback entity-feedback--error">{feedback}</p> : null}
+
+      <form className="entity-form" onSubmit={handleSubmit}>
+        <article className="entity-card">
+          <div className="entity-card__header">
+            <div>
+              <h2>Planejamento da manutencao</h2>
+              <p>Defina o veiculo, o tipo de servico e o fluxo operacional da manutencao.</p>
+            </div>
+          </div>
+
+          <div className="entity-form__grid entity-form__grid--4">
+            <label className="entity-field entity-field--span-2">
+              <span>Veiculo</span>
+              <select name="veiculo_id" value={formData.veiculo_id} onChange={handleChange} required>
+                <option value="">Selecione um veiculo</option>
+                {veiculos.map((veiculo) => (
+                  <option key={veiculo.id} value={String(veiculo.id)}>
+                    {veiculo.placa} - {veiculo.marca} {veiculo.modelo}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="entity-field">
+              <span>Tipo</span>
+              <select name="tipo" value={formData.tipo} onChange={handleChange}>
+                {tipoOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {formatLabel(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="entity-field">
+              <span>Status</span>
+              <select name="status" value={formData.status} onChange={handleChange}>
+                {statusOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {formatLabel(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="entity-field entity-field--span-2">
+              <span>Oficina</span>
+              <input name="oficina" value={formData.oficina} onChange={handleChange} placeholder="Nome da oficina ou fornecedor" />
+            </label>
+            <label className="entity-field entity-field--span-2">
+              <span>Descricao</span>
+              <input name="descricao" value={formData.descricao} onChange={handleChange} required />
+            </label>
+          </div>
+        </article>
+
+        <article className="entity-card">
+          <div className="entity-card__header">
+            <div>
+              <h2>Custos, quilometragem e agenda</h2>
+              <p>Campos usados para acompanhamento preventivo, financeiro e operacional da frota.</p>
+            </div>
+          </div>
+
+          <div className="entity-form__grid entity-form__grid--4">
+            <label className="entity-field">
+              <span>KM atual da manutencao</span>
+              <input name="km_na_manutencao" type="number" value={formData.km_na_manutencao} onChange={handleChange} />
+            </label>
+            <label className="entity-field">
+              <span>KM da proxima manutencao</span>
+              <input
+                name="km_proxima_manutencao"
+                type="number"
+                value={formData.km_proxima_manutencao}
+                onChange={handleChange}
+              />
+            </label>
+            <label className="entity-field">
+              <span>Custo</span>
+              <input name="custo" type="number" step="0.01" value={formData.custo} onChange={handleChange} />
+            </label>
+            <label className="entity-field">
+              <span>Data agendada</span>
+              <input name="data_agendada" type="date" value={formData.data_agendada} onChange={handleChange} />
+            </label>
+            <label className="entity-field">
+              <span>Data de conclusao</span>
+              <input name="data_conclusao" type="date" value={formData.data_conclusao} onChange={handleChange} />
+            </label>
+          </div>
+        </article>
+
+        <article className="entity-card">
+          <div className="entity-card__header">
+            <div>
+              <h2>Observacoes</h2>
+              <p>Notas internas sobre pecas, prazo, ocorrencias e alinhamento com a oficina.</p>
+            </div>
+          </div>
+
+          <label className="entity-field">
+            <span>Observacoes internas</span>
+            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+          </label>
+        </article>
+
+        <div className="entity-form__actions">
+          <Link className="entity-action entity-action--secondary" to="/dashboard/manutencoes/listar">
+            Cancelar
+          </Link>
+          <button className="entity-action entity-action--primary" type="submit" disabled={isSaving}>
+            {isSaving ? 'Salvando...' : isEditing ? 'Salvar alteracoes' : 'Cadastrar manutencao'}
+          </button>
+        </div>
+      </form>
+    </section>
+  )
+}

@@ -236,7 +236,7 @@ export function VeiculosListPage() {
                     >
                       <span>
                         <strong>{item.placa}</strong>
-                        <small>{item.marca} {item.modelo} · {item.ano}</small>
+                        <small>{item.marca} {item.modelo} - {item.ano}</small>
                       </span>
                       <span>
                         <strong>{formatLabel(item.tipo)}</strong>
@@ -253,6 +253,9 @@ export function VeiculosListPage() {
                     <span className="entity-table__actions">
                       <Link className="entity-action entity-action--ghost" to={`/dashboard/veiculos/${item.id}/editar`}>
                         Editar
+                      </Link>
+                      <Link className="entity-action entity-action--secondary" to={`/dashboard/veiculos/${item.id}/manutencoes`}>
+                        Manutencoes
                       </Link>
                       <button className="entity-action entity-action--danger" type="button" onClick={() => void handleDelete(item.id)}>
                         Excluir
@@ -328,7 +331,7 @@ export function VeiculosListPage() {
                     historico.slice(0, 5).map((item) => (
                       <div className="entity-timeline__item" key={item.id}>
                         <strong>{item.titulo ?? item.tipo ?? 'Evento'}</strong>
-                        <span>{item.descricao ?? item.status ?? 'Sem detalhes'} · {item.data ?? 'Sem data'}</span>
+                        <span>{item.descricao ?? item.status ?? 'Sem detalhes'} - {item.data_evento ?? 'Sem data'}</span>
                       </div>
                     ))
                   )}

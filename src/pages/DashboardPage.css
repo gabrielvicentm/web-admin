@@ -839,6 +839,23 @@ body {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) auto;
 }
 
+.entity-table__head--manutencoes,
+.entity-table__row--manutencoes {
+  grid-template-columns: minmax(150px, 0.92fr) minmax(160px, 1fr) minmax(150px, 0.9fr) 148px 196px;
+  column-gap: 12px;
+}
+
+.entity-table__head--manutencoes span:nth-child(3),
+.entity-table__head--manutencoes span:nth-child(4),
+.entity-table__head--manutencoes span:nth-child(5) {
+  text-align: center;
+}
+
+.entity-table__head--manutencoes span:first-child,
+.entity-table__row--manutencoes .entity-table__main--manutencoes .entity-table__cell:first-child {
+  padding-left: 14px;
+}
+
 .entity-table__row {
   padding: 16px 0;
   border-top: 1px solid rgba(125, 154, 196, 0.1);
@@ -867,14 +884,40 @@ body {
 
 .entity-table__main--veiculos {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr;
+  grid-column: 1 / span 4;
 }
 
 .entity-table__main--clientes {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.05fr);
+  grid-column: 1 / span 3;
 }
 
 .entity-table__main--tipos-carga {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  grid-column: 1 / span 2;
+}
+
+.entity-table__main--manutencoes {
+  grid-template-columns: minmax(150px, 0.92fr) minmax(160px, 1fr) minmax(150px, 0.9fr) 148px;
+  grid-column: 1 / span 4;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.entity-table__main--manutencoes .entity-table__cell {
+  align-self: center;
+}
+
+.entity-table__main--manutencoes .entity-table__cell:nth-child(3),
+.entity-table__main--manutencoes .entity-table__cell--status {
+  justify-items: center;
+  text-align: center;
+}
+
+.entity-table__row--manutencoes .entity-table__actions {
+  justify-content: center;
+  justify-self: center;
+  width: 100%;
 }
 
 .entity-table__main span,
@@ -901,6 +944,8 @@ body {
   gap: 10px;
   justify-content: flex-end;
   flex-wrap: wrap;
+  align-items: center;
+  justify-self: end;
 }
 
 .entity-table__actions--motoristas {
@@ -1003,6 +1048,26 @@ body {
   color: #ffd389;
 }
 
+.entity-status--agendada {
+  background: rgba(76, 141, 255, 0.14);
+  color: #9cc0ff;
+}
+
+.entity-status--em_andamento {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd389;
+}
+
+.entity-status--concluida {
+  background: rgba(31, 210, 138, 0.14);
+  color: #91f0c5;
+}
+
+.entity-status--cancelada {
+  background: rgba(255, 106, 106, 0.12);
+  color: #ffc2c2;
+}
+
 .entity-pagination {
   display: flex;
   align-items: center;
@@ -1089,6 +1154,32 @@ body {
   margin-top: 10px;
 }
 
+.entity-timeline__item--maintenance {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-timeline__meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.entity-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+.entity-detail-grid span {
+  color: var(--dashboard-text-soft);
+}
+
+.entity-detail-grid strong {
+  color: var(--dashboard-text);
+}
+
 .entity-metric-list {
   display: grid;
   gap: 10px;
@@ -1164,7 +1255,8 @@ body {
   }
 
   .entity-table__row--motoristas,
-  .entity-table__row--veiculos {
+  .entity-table__row--veiculos,
+  .entity-table__row--manutencoes {
     grid-template-columns: 1fr;
   }
 
@@ -1185,6 +1277,10 @@ body {
   .entity-form__grid--2,
   .entity-form__grid--3,
   .entity-form__grid--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-detail-grid {
     grid-template-columns: 1fr;
   }
 

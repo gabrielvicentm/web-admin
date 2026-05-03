@@ -7,6 +7,9 @@ import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { DashboardPage } from './pages/DashboardPage'
+import { ManutencaoFormPage } from './pages/ManutencaoFormPage'
+import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
+import { ManutencoesListPage } from './pages/ManutencoesListPage'
 import { MotoristaFormPage } from './pages/MotoristaFormPage'
 import { MotoristasListPage } from './pages/MotoristasListPage'
 import { SectionPage } from './pages/SectionPage'
@@ -41,7 +44,10 @@ function App() {
           <Route path="motoristas/listar" element={<MotoristasListPage />} />
           <Route path="motoristas/novo" element={<MotoristaFormPage />} />
           <Route path="motoristas/:id/editar" element={<MotoristaFormPage />} />
-          <Route path="manutencao" element={<SectionPage />} />
+          <Route path="manutencoes/listar" element={<ManutencoesListPage />} />
+          <Route path="manutencoes/nova" element={<ManutencaoFormPage />} />
+          <Route path="manutencoes/:id/editar" element={<ManutencaoFormPage />} />
+          <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<SectionPage />} />
