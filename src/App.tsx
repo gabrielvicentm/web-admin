@@ -15,6 +15,8 @@ import { MotoristasListPage } from './pages/MotoristasListPage'
 import { SectionPage } from './pages/SectionPage'
 import { TipoCargaFormPage } from './pages/TipoCargaFormPage'
 import { TiposCargaListPage } from './pages/TiposCargaListPage'
+import { ViagemFormPage } from './pages/ViagemFormPage'
+import { ViagensListPage } from './pages/ViagensListPage'
 import { VeiculoFormPage } from './pages/VeiculoFormPage'
 import { VeiculosListPage } from './pages/VeiculosListPage'
 
@@ -28,8 +30,8 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<DashboardHome />} />
-          <Route path="viagens/listar" element={<SectionPage />} />
-          <Route path="viagens/nova" element={<SectionPage />} />
+          <Route path="viagens/listar" element={<ViagensListPage />} />
+          <Route path="viagens/nova" element={<ViagemFormPage />} />
           <Route path="veiculos/listar" element={<VeiculosListPage />} />
           <Route path="veiculos/novo" element={<VeiculoFormPage />} />
           <Route path="veiculos/:id/editar" element={<VeiculoFormPage />} />

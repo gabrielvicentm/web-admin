@@ -829,6 +829,11 @@ body {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr auto;
 }
 
+.entity-table__head--viagens,
+.entity-table__row--viagens {
+  grid-template-columns: minmax(0, 1.45fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(130px, 0.75fr) 125px auto;
+}
+
 .entity-table__head--clientes,
 .entity-table__row--clientes {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr) minmax(0, 1.05fr) auto;
@@ -885,6 +890,11 @@ body {
 .entity-table__main--veiculos {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr;
   grid-column: 1 / span 4;
+}
+
+.entity-table__main--viagens {
+  grid-template-columns: minmax(0, 1.45fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(130px, 0.75fr) 125px;
+  grid-column: 1 / span 5;
 }
 
 .entity-table__main--clientes {
@@ -1026,18 +1036,22 @@ body {
 }
 
 .entity-status--ativo,
-.entity-status--disponivel {
+.entity-status--disponivel,
+.entity-status--planejada,
+.entity-status--concluida {
   background: rgba(31, 210, 138, 0.14);
   color: #91f0c5;
 }
 
-.entity-status--inativo {
+.entity-status--inativo,
+.entity-status--cancelada {
   background: rgba(142, 160, 190, 0.14);
   color: #cad8ee;
 }
 
 .entity-status--ferias,
-.entity-status--em_uso {
+.entity-status--em_uso,
+.entity-status--em_andamento {
   background: rgba(76, 141, 255, 0.14);
   color: #9cc0ff;
 }
@@ -1223,12 +1237,54 @@ body {
   gap: 12px;
 }
 
+.trip-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.trip-selection {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(125, 154, 196, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.trip-selection span,
+.trip-selection small {
+  display: block;
+  color: var(--dashboard-text-soft);
+}
+
+.trip-selection span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trip-selection strong {
+  display: block;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.trip-selection small {
+  margin-top: 6px;
+}
+
 @media (max-width: 1240px) {
   .entity-grid {
     grid-template-columns: 1fr;
   }
 
   .entity-form__grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trip-selection-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1256,7 +1312,11 @@ body {
 
   .entity-table__row--motoristas,
   .entity-table__row--veiculos,
+<<<<<<< HEAD
   .entity-table__row--manutencoes {
+=======
+  .entity-table__row--viagens {
+>>>>>>> c780514 (Tela de criar e listar viagem)
     grid-template-columns: 1fr;
   }
 
@@ -1286,5 +1346,9 @@ body {
 
   .entity-field--span-2 {
     grid-column: auto;
+  }
+
+  .trip-selection-grid {
+    grid-template-columns: 1fr;
   }
 }
