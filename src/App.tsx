@@ -12,6 +12,7 @@ import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
 import { ManutencoesListPage } from './pages/ManutencoesListPage'
 import { MotoristaFormPage } from './pages/MotoristaFormPage'
 import { MotoristasListPage } from './pages/MotoristasListPage'
+import { RelatoriosPage } from './pages/RelatoriosPage'
 import { SectionPage } from './pages/SectionPage'
 import { TipoCargaFormPage } from './pages/TipoCargaFormPage'
 import { TiposCargaListPage } from './pages/TiposCargaListPage'
@@ -53,7 +54,7 @@ function App() {
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<SectionPage />} />
-          <Route path="relatorios" element={<SectionPage />} />
+          <Route path="relatorios" element={<RelatoriosPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate replace to="/dashboard" />} />
