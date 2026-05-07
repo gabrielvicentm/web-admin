@@ -72,11 +72,51 @@ const initialFormState: MotoristaFormData = {
   nova_senha: '',
 }
 
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function formatApiDate(value: string) {
+  if (!value) {
+    return ''
+  }
+
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, year, month, day] = match
+  return `${day}/${month}/${year}`
+}
+
+function buildApiDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, day, month, year] = match
+  return `${year}-${month}-${day}`
+}
+
 export function MotoristaFormPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditing = Boolean(id)
   const [formData, setFormData] = useState<MotoristaFormData>(initialFormState)
+  const [dataAdmissaoInput, setDataAdmissaoInput] = useState('')
+  const [validadeCnhInput, setValidadeCnhInput] = useState('')
   const [fotoFile, setFotoFile] = useState<File | null>(null)
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState('')
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState('')
@@ -124,6 +164,11 @@ export function MotoristaFormPage() {
     void loadMotorista()
   }, [id])
 
+  useEffect(() => {
+    setDataAdmissaoInput(formatApiDate(formData.data_admissao))
+    setValidadeCnhInput(formatApiDate(formData.validade_cnh))
+  }, [formData.data_admissao, formData.validade_cnh])
+
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
     if (name === 'endereco_cep') {
@@ -137,6 +182,21 @@ export function MotoristaFormPage() {
     }
 
     setFormData((current) => ({ ...current, [name]: value }))
+  }
+
+  function handleDateFieldChange(field: 'data_admissao' | 'validade_cnh', value: string) {
+    const formattedValue = formatBrazilianDate(value)
+
+    if (field === 'data_admissao') {
+      setDataAdmissaoInput(formattedValue)
+    } else {
+      setValidadeCnhInput(formattedValue)
+    }
+
+    setFormData((current) => ({
+      ...current,
+      [field]: buildApiDate(formattedValue),
+    }))
   }
 
   async function handleCepBlur() {
@@ -270,7 +330,16 @@ export function MotoristaFormPage() {
             </label>
             <label className="entity-field">
               <span>Data de admissao</span>
-              <input name="data_admissao" type="date" value={formData.data_admissao} onChange={handleChange} required />
+              <input
+                name="data_admissao_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={dataAdmissaoInput}
+                onChange={(event) => handleDateFieldChange('data_admissao', event.target.value)}
+                required
+              />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
             <label className="entity-field">
               <span>Status</span>
@@ -310,7 +379,16 @@ export function MotoristaFormPage() {
             </label>
             <label className="entity-field">
               <span>Validade da CNH</span>
-              <input name="validade_cnh" type="date" value={formData.validade_cnh} onChange={handleChange} required />
+              <input
+                name="validade_cnh_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={validadeCnhInput}
+                onChange={(event) => handleDateFieldChange('validade_cnh', event.target.value)}
+                required
+              />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
             <label className="entity-field">
               <span>{isEditing ? 'Nova senha' : 'Senha inicial'}</span>

@@ -19,6 +19,30 @@ type LoadViagensOverrides = {
   limit?: number
 }
 
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function buildApiDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, day, month, year] = match
+  return `${year}-${month}-${day}`
+}
+
 function formatLabel(text: string) {
   return text.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
@@ -56,6 +80,8 @@ export function ViagensListPage() {
   const [status, setStatus] = useState('')
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
+  const [dataInicioInput, setDataInicioInput] = useState('')
+  const [dataFimInput, setDataFimInput] = useState('')
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [total, setTotal] = useState(0)
@@ -111,8 +137,10 @@ export function ViagensListPage() {
   }
 
   function handleFilter() {
+    setDataInicio(buildApiDate(dataInicioInput))
+    setDataFim(buildApiDate(dataFimInput))
     setPage(1)
-    void loadViagens({ page: 1 })
+    void loadViagens({ dataInicio: buildApiDate(dataInicioInput), dataFim: buildApiDate(dataFimInput), page: 1 })
   }
 
   function handleClearFilters() {
@@ -120,6 +148,8 @@ export function ViagensListPage() {
     setStatus('')
     setDataInicio('')
     setDataFim('')
+    setDataInicioInput('')
+    setDataFimInput('')
     setPage(1)
     void loadViagens({ search: '', status: '', dataInicio: '', dataFim: '', page: 1 })
   }
@@ -174,11 +204,25 @@ export function ViagensListPage() {
         </div>
         <div className="entity-toolbar__field">
           <label htmlFor="viagem-data-inicio">Saida inicial</label>
-          <input id="viagem-data-inicio" type="date" value={dataInicio} onChange={(event) => setDataInicio(event.target.value)} />
+          <input
+            id="viagem-data-inicio"
+            type="text"
+            inputMode="numeric"
+            placeholder="dd/mm/aaaa"
+            value={dataInicioInput}
+            onChange={(event) => setDataInicioInput(formatBrazilianDate(event.target.value))}
+          />
         </div>
         <div className="entity-toolbar__field">
           <label htmlFor="viagem-data-fim">Saida final</label>
-          <input id="viagem-data-fim" type="date" value={dataFim} onChange={(event) => setDataFim(event.target.value)} />
+          <input
+            id="viagem-data-fim"
+            type="text"
+            inputMode="numeric"
+            placeholder="dd/mm/aaaa"
+            value={dataFimInput}
+            onChange={(event) => setDataFimInput(formatBrazilianDate(event.target.value))}
+          />
         </div>
         <div className="entity-toolbar__field">
           <label htmlFor="viagem-limit">Por pagina</label>

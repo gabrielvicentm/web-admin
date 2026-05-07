@@ -25,6 +25,30 @@ const initialFilters: RelatorioViagensParams = {
   status: '',
 }
 
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function buildApiDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, day, month, year] = match
+  return `${year}-${month}-${day}`
+}
+
 function formatCellValue(value: unknown) {
   if (value === null || value === undefined || value === '') {
     return '—'
@@ -53,6 +77,8 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export function RelatoriosPage() {
   const [filters, setFilters] = useState<RelatorioViagensParams>(initialFilters)
+  const [dataSaidaDeInput, setDataSaidaDeInput] = useState('')
+  const [dataSaidaAteInput, setDataSaidaAteInput] = useState('')
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [motoristas, setMotoristas] = useState<MotoristaListItem[]>([])
   const [veiculos, setVeiculos] = useState<VeiculoListItem[]>([])
@@ -106,8 +132,25 @@ export function RelatoriosPage() {
     setFilters((current) => ({ ...current, [name]: value }))
   }
 
+  function handleDateFilterChange(field: 'data_saida_de' | 'data_saida_ate', value: string) {
+    const formattedValue = formatBrazilianDate(value)
+
+    if (field === 'data_saida_de') {
+      setDataSaidaDeInput(formattedValue)
+    } else {
+      setDataSaidaAteInput(formattedValue)
+    }
+
+    setFilters((current) => ({
+      ...current,
+      [field]: buildApiDate(formattedValue),
+    }))
+  }
+
   function handleClearFilters() {
     setFilters(initialFilters)
+    setDataSaidaDeInput('')
+    setDataSaidaAteInput('')
     setPreviewRows([])
     setPreviewTotal(0)
     setPreviewStatus('idle')
@@ -202,11 +245,25 @@ export function RelatoriosPage() {
           <div className="reports-filters-grid">
             <label className="entity-field">
               <span>Data de saida inicial</span>
-              <input name="data_saida_de" type="date" value={filters.data_saida_de ?? ''} onChange={handleFilterChange} />
+              <input
+                name="data_saida_de_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={dataSaidaDeInput}
+                onChange={(event) => handleDateFilterChange('data_saida_de', event.target.value)}
+              />
             </label>
             <label className="entity-field">
               <span>Data de saida final</span>
-              <input name="data_saida_ate" type="date" value={filters.data_saida_ate ?? ''} onChange={handleFilterChange} />
+              <input
+                name="data_saida_ate_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={dataSaidaAteInput}
+                onChange={(event) => handleDateFilterChange('data_saida_ate', event.target.value)}
+              />
             </label>
             <label className="entity-field">
               <span>Status</span>

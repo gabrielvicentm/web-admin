@@ -29,11 +29,52 @@ const initialFormState: VeiculoFormData = {
   observacoes: '',
 }
 
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function formatApiDate(value: string) {
+  if (!value) {
+    return ''
+  }
+
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, year, month, day] = match
+  return `${day}/${month}/${year}`
+}
+
+function buildApiDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, day, month, year] = match
+  return `${year}-${month}-${day}`
+}
+
 export function VeiculoFormPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditing = Boolean(id)
   const [formData, setFormData] = useState<VeiculoFormData>(initialFormState)
+  const [vencimentoSeguroInput, setVencimentoSeguroInput] = useState('')
+  const [vencimentoLicenciamentoInput, setVencimentoLicenciamentoInput] = useState('')
+  const [vencimentoIpvaInput, setVencimentoIpvaInput] = useState('')
   const [isLoading, setIsLoading] = useState(isEditing)
   const [isSaving, setIsSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
@@ -62,9 +103,35 @@ export function VeiculoFormPage() {
     void loadVeiculo()
   }, [id])
 
+  useEffect(() => {
+    setVencimentoSeguroInput(formatApiDate(formData.vencimento_seguro))
+    setVencimentoLicenciamentoInput(formatApiDate(formData.vencimento_licenciamento))
+    setVencimentoIpvaInput(formatApiDate(formData.vencimento_ipva))
+  }, [formData.vencimento_seguro, formData.vencimento_licenciamento, formData.vencimento_ipva])
+
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
     setFormData((current) => ({ ...current, [name]: value }))
+  }
+
+  function handleDateFieldChange(
+    field: 'vencimento_seguro' | 'vencimento_licenciamento' | 'vencimento_ipva',
+    value: string,
+  ) {
+    const formattedValue = formatBrazilianDate(value)
+
+    if (field === 'vencimento_seguro') {
+      setVencimentoSeguroInput(formattedValue)
+    } else if (field === 'vencimento_licenciamento') {
+      setVencimentoLicenciamentoInput(formattedValue)
+    } else {
+      setVencimentoIpvaInput(formattedValue)
+    }
+
+    setFormData((current) => ({
+      ...current,
+      [field]: buildApiDate(formattedValue),
+    }))
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -206,24 +273,38 @@ export function VeiculoFormPage() {
             <label className="entity-field">
               <span>Vencimento do seguro</span>
               <input
-                name="vencimento_seguro"
-                type="date"
-                value={formData.vencimento_seguro}
-                onChange={handleChange}
+                name="vencimento_seguro_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={vencimentoSeguroInput}
+                onChange={(event) => handleDateFieldChange('vencimento_seguro', event.target.value)}
               />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
             <label className="entity-field">
               <span>Vencimento licenciamento</span>
               <input
-                name="vencimento_licenciamento"
-                type="date"
-                value={formData.vencimento_licenciamento}
-                onChange={handleChange}
+                name="vencimento_licenciamento_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={vencimentoLicenciamentoInput}
+                onChange={(event) => handleDateFieldChange('vencimento_licenciamento', event.target.value)}
               />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
             <label className="entity-field">
               <span>Vencimento IPVA</span>
-              <input name="vencimento_ipva" type="date" value={formData.vencimento_ipva} onChange={handleChange} />
+              <input
+                name="vencimento_ipva_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={vencimentoIpvaInput}
+                onChange={(event) => handleDateFieldChange('vencimento_ipva', event.target.value)}
+              />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
           </div>
         </article>

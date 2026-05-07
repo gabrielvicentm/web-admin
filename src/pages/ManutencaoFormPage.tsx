@@ -26,6 +26,44 @@ const initialFormState: ManutencaoFormData = {
   observacoes: '',
 }
 
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function formatApiDate(value: string) {
+  if (!value) {
+    return ''
+  }
+
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, year, month, day] = match
+  return `${day}/${month}/${year}`
+}
+
+function buildApiDate(value: string) {
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) {
+    return ''
+  }
+
+  const [, day, month, year] = match
+  return `${year}-${month}-${day}`
+}
+
 function formatLabel(text: string) {
   return text.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
@@ -35,6 +73,8 @@ export function ManutencaoFormPage() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const [formData, setFormData] = useState<ManutencaoFormData>(initialFormState)
+  const [dataAgendadaInput, setDataAgendadaInput] = useState('')
+  const [dataConclusaoInput, setDataConclusaoInput] = useState('')
   const [veiculos, setVeiculos] = useState<VeiculoListItem[]>([])
   const [isLoading, setIsLoading] = useState(isEditing)
   const [isSaving, setIsSaving] = useState(false)
@@ -77,9 +117,29 @@ export function ManutencaoFormPage() {
     void loadManutencao()
   }, [id])
 
+  useEffect(() => {
+    setDataAgendadaInput(formatApiDate(formData.data_agendada))
+    setDataConclusaoInput(formatApiDate(formData.data_conclusao))
+  }, [formData.data_agendada, formData.data_conclusao])
+
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
     setFormData((current) => ({ ...current, [name]: value }))
+  }
+
+  function handleDateFieldChange(field: 'data_agendada' | 'data_conclusao', value: string) {
+    const formattedValue = formatBrazilianDate(value)
+
+    if (field === 'data_agendada') {
+      setDataAgendadaInput(formattedValue)
+    } else {
+      setDataConclusaoInput(formattedValue)
+    }
+
+    setFormData((current) => ({
+      ...current,
+      [field]: buildApiDate(formattedValue),
+    }))
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -215,11 +275,27 @@ export function ManutencaoFormPage() {
             </label>
             <label className="entity-field">
               <span>Data agendada</span>
-              <input name="data_agendada" type="date" value={formData.data_agendada} onChange={handleChange} />
+              <input
+                name="data_agendada_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={dataAgendadaInput}
+                onChange={(event) => handleDateFieldChange('data_agendada', event.target.value)}
+              />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
             <label className="entity-field">
               <span>Data de conclusao</span>
-              <input name="data_conclusao" type="date" value={formData.data_conclusao} onChange={handleChange} />
+              <input
+                name="data_conclusao_input"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
+                value={dataConclusaoInput}
+                onChange={(event) => handleDateFieldChange('data_conclusao', event.target.value)}
+              />
+              <small>Formato brasileiro: dia/mes/ano</small>
             </label>
           </div>
         </article>
