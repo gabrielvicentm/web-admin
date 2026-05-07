@@ -1312,11 +1312,8 @@ body {
 
   .entity-table__row--motoristas,
   .entity-table__row--veiculos,
-<<<<<<< HEAD
   .entity-table__row--manutencoes {
-=======
   .entity-table__row--viagens {
->>>>>>> c780514 (Tela de criar e listar viagem)
     grid-template-columns: 1fr;
   }
 
@@ -1351,4 +1348,4 @@ body {
   .trip-selection-grid {
     grid-template-columns: 1fr;
   }
-}
+}}
