@@ -16,6 +16,7 @@ import { RelatoriosPage } from './pages/RelatoriosPage'
 import { SectionPage } from './pages/SectionPage'
 import { TipoCargaFormPage } from './pages/TipoCargaFormPage'
 import { TiposCargaListPage } from './pages/TiposCargaListPage'
+import { ViagemDetailPage } from './pages/ViagemDetailPage'
 import { ViagemFormPage } from './pages/ViagemFormPage'
 import { ViagensListPage } from './pages/ViagensListPage'
 import { VeiculoFormPage } from './pages/VeiculoFormPage'
@@ -33,6 +34,7 @@ function App() {
           <Route index element={<DashboardHome />} />
           <Route path="viagens/listar" element={<ViagensListPage />} />
           <Route path="viagens/nova" element={<ViagemFormPage />} />
+          <Route path="viagens/:id/editar" element={<ViagemDetailPage />} />
           <Route path="veiculos/listar" element={<VeiculosListPage />} />
           <Route path="veiculos/novo" element={<VeiculoFormPage />} />
           <Route path="veiculos/:id/editar" element={<VeiculoFormPage />} />

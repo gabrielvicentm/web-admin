@@ -51,6 +51,56 @@ export type ViagemListItem = Viagem & {
   tipo_carga_nome?: string
 }
 
+export type ViagemTimelineItem = {
+  id: string | number
+  titulo?: string
+  descricao?: string
+  tipo?: string
+  status?: string
+  data_evento?: string
+}
+
+export type ViagemDocumento = {
+  id: string | number
+  nome?: string
+  tipo?: string
+  status?: string
+  numero?: string
+  data_emissao?: string
+  data_validade?: string
+  url?: string
+  observacoes?: string
+}
+
+export type ViagemOcorrencia = {
+  id: string | number
+  titulo?: string
+  descricao?: string
+  status?: string
+  severidade?: string
+  data_ocorrencia?: string
+  responsavel_nome?: string
+}
+
+export type ViagemAbastecimento = {
+  id: string | number
+  veiculo_placa?: string
+  posto?: string
+  combustivel?: string
+  litros?: number | string
+  valor_total?: number | string
+  valor_litro?: number | string
+  km_atual?: number | string
+  data_abastecimento?: string
+}
+
+export type ViagemDetalhe = ViagemListItem & {
+  timeline?: ViagemTimelineItem[]
+  documentos?: ViagemDocumento[]
+  ocorrencias?: ViagemOcorrencia[]
+  abastecimentos?: ViagemAbastecimento[]
+}
+
 type ListViagensParams = {
   search?: string
   status?: string
@@ -104,13 +154,43 @@ export const viagemService = {
     return response.data
   },
 
+  async getById(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemDetalhe>>(`/admin/viagens/${id}`)
+    return response.data
+  },
+
   async create(payload: ViagemFormData) {
     const response = await api.post<ApiResponse<Viagem>>('/admin/viagens', normalizeViagemPayload(payload))
     return response.data
   },
 
+  async update(id: string | number, payload: ViagemFormData) {
+    const response = await api.put<ApiResponse<ViagemDetalhe>>(`/admin/viagens/${id}`, normalizeViagemPayload(payload))
+    return response.data
+  },
+
   async remove(id: string | number) {
     const response = await api.delete<ApiResponse<null>>(`/admin/viagens/${id}`)
+    return response.data
+  },
+
+  async getTimeline(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemTimelineItem[]>>(`/admin/viagens/${id}/timeline`)
+    return response.data
+  },
+
+  async getDocumentos(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemDocumento[]>>(`/admin/viagens/${id}/documentos`)
+    return response.data
+  },
+
+  async getOcorrencias(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemOcorrencia[]>>(`/admin/viagens/${id}/ocorrencias`)
+    return response.data
+  },
+
+  async getAbastecimentos(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemAbastecimento[]>>(`/admin/viagens/${id}/abastecimentos`)
     return response.data
   },
 }

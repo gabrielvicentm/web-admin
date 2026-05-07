@@ -257,6 +257,9 @@ export function ViagensListPage() {
                       </span>
                     </button>
                     <span className="entity-table__actions">
+                      <Link className="entity-action entity-action--ghost" to={`/dashboard/viagens/${item.id}/editar`}>
+                        Ver/editar
+                      </Link>
                       <button className="entity-action entity-action--danger" type="button" onClick={() => void handleDelete(item.id)}>
                         Excluir
                       </button>

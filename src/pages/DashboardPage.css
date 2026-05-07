@@ -871,6 +871,12 @@ body {
   border: 1px solid rgba(255, 106, 106, 0.16);
 }
 
+.entity-feedback--success {
+  background: rgba(31, 210, 138, 0.1);
+  color: #9cf1ca;
+  border: 1px solid rgba(31, 210, 138, 0.16);
+}
+
 .entity-table {
   display: grid;
 }
@@ -1203,6 +1209,10 @@ body {
   gap: 12px;
 }
 
+.entity-kpi-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .entity-kpi {
   padding: 16px;
   border-radius: 18px;
@@ -1347,12 +1357,95 @@ body {
   margin-top: 6px;
 }
 
+.trip-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.trip-linked-panel {
+  position: sticky;
+  top: 104px;
+}
+
+.trip-detail-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.trip-detail-tabs button {
+  min-height: 42px;
+  border: 1px solid rgba(125, 154, 196, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text-soft);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.trip-detail-tabs button.is-active {
+  color: #dceaff;
+  background: rgba(76, 141, 255, 0.14);
+  border-color: rgba(76, 141, 255, 0.22);
+}
+
+.trip-detail-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trip-detail-list small,
+.trip-detail-link {
+  display: block;
+  margin-top: 6px;
+  color: var(--dashboard-text-soft);
+}
+
+.trip-detail-link {
+  color: #9fc4ff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.trip-timeline-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.trip-timeline-item__marker {
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--dashboard-primary);
+  box-shadow: 0 0 0 5px rgba(76, 141, 255, 0.12);
+}
+
 @media (max-width: 1240px) {
   .entity-grid {
     grid-template-columns: 1fr;
   }
 
+  .trip-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .trip-linked-panel {
+    position: static;
+  }
+
   .entity-form__grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .entity-kpi-grid--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1384,8 +1477,8 @@ body {
 
   .entity-table__row--motoristas,
   .entity-table__row--veiculos,
+  .entity-table__row--viagens,
   .entity-table__row--manutencoes {
-  .entity-table__row--viagens {
     grid-template-columns: 1fr;
   }
 
@@ -1420,4 +1513,9 @@ body {
   .trip-selection-grid {
     grid-template-columns: 1fr;
   }
-}}
+
+  .entity-kpi-grid--4,
+  .trip-detail-tabs {
+    grid-template-columns: 1fr;
+  }
+}
