@@ -79,6 +79,7 @@ const navigationItems: DashboardNavItem[] = [
   { label: 'Abastecimentos', icon: FuelIcon, to: '/dashboard/abastecimentos' },
   { label: 'Ocorrencias', icon: AlertIcon, to: '/dashboard/ocorrencias' },
   { label: 'Folha de pagamento', icon: PayrollIcon, to: '/dashboard/folha-pagamento' },
+  { label: 'Historico de alteracoes', icon: ListIcon, to: '/dashboard/historico-alteracoes' },
   { label: 'Relatorios', icon: ReportIcon, to: '/dashboard/relatorios' },
 ]
 

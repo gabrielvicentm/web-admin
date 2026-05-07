@@ -761,6 +761,22 @@ body {
   align-items: end;
 }
 
+.history-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(7, minmax(130px, 0.72fr)) auto auto;
+  gap: 14px;
+  align-items: end;
+  padding: 18px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  box-shadow: var(--dashboard-shadow);
+}
+
+.history-toolbar__field--wide {
+  min-width: 0;
+}
+
 .entity-toolbar--compact {
   grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.5fr) auto;
 }
@@ -928,6 +944,11 @@ body {
   column-gap: 12px;
 }
 
+.entity-table__head--historico,
+.entity-table__row--historico {
+  grid-template-columns: minmax(0, 1.45fr) minmax(150px, 0.72fr) minmax(180px, 1fr) minmax(140px, 0.72fr);
+}
+
 .entity-table__head--manutencoes span:nth-child(3),
 .entity-table__head--manutencoes span:nth-child(4),
 .entity-table__head--manutencoes span:nth-child(5) {
@@ -956,6 +977,18 @@ body {
   padding: 0;
   background: transparent;
   color: var(--dashboard-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-row {
+  width: 100%;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: transparent;
+  color: var(--dashboard-text);
+  font: inherit;
   text-align: left;
   cursor: pointer;
 }
@@ -1428,9 +1461,63 @@ body {
   box-shadow: 0 0 0 5px rgba(76, 141, 255, 0.12);
 }
 
+.history-change-list {
+  display: grid;
+  gap: 12px;
+}
+
+.history-change-list h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.history-change {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.history-change__values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.history-change__values span {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.history-change__values small {
+  color: var(--dashboard-text-soft);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-change__values code {
+  display: block;
+  min-height: 42px;
+  padding: 10px;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(1, 8, 20, 0.34);
+  color: #dceaff;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1240px) {
   .entity-grid {
     grid-template-columns: 1fr;
+  }
+
+  .history-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .trip-detail-layout {
@@ -1456,7 +1543,8 @@ body {
 
 @media (max-width: 920px) {
   .entity-page__hero,
-  .entity-toolbar {
+  .entity-toolbar,
+  .history-toolbar {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
@@ -1478,7 +1566,8 @@ body {
   .entity-table__row--motoristas,
   .entity-table__row--veiculos,
   .entity-table__row--viagens,
-  .entity-table__row--manutencoes {
+  .entity-table__row--manutencoes,
+  .entity-table__row--historico {
     grid-template-columns: 1fr;
   }
 
@@ -1515,7 +1604,8 @@ body {
   }
 
   .entity-kpi-grid--4,
-  .trip-detail-tabs {
+  .trip-detail-tabs,
+  .history-change__values {
     grid-template-columns: 1fr;
   }
 }

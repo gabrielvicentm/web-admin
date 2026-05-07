@@ -7,6 +7,7 @@ import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { DashboardPage } from './pages/DashboardPage'
+import { HistoricoAlteracoesPage } from './pages/HistoricoAlteracoesPage'
 import { ManutencaoFormPage } from './pages/ManutencaoFormPage'
 import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
 import { ManutencoesListPage } from './pages/ManutencoesListPage'
@@ -56,6 +57,7 @@ function App() {
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<SectionPage />} />
+          <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />
         </Route>
       </Route>
