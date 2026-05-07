@@ -1,40 +1,45 @@
 import { api } from './api'
 import type { ApiResponse, PaginatedApiResponse } from './httpTypes'
 
-export type ViagemStatus = 'planejada' | 'em_andamento' | 'concluida' | 'cancelada'
+export type ViagemStatus = 'pendente' | 'em_andamento' | 'concluida' | 'cancelada'
 
 export type ViagemFormData = {
   cliente_id: string
   motorista_id: string
   veiculo_id: string
   tipo_carga_id: string
-  origem: string
-  destino: string
+  origem_cidade: string
+  origem_uf: string
+  destino_cidade: string
+  destino_uf: string
   data_saida: string
-  data_previsao_chegada: string
+  data_chegada_prevista: string
   distancia_km: string
   peso_carga_kg: string
   valor_frete: string
+  km_inicial: string
   status: ViagemStatus
-  descricao_carga: string
   observacoes: string
 }
 
 export type Viagem = {
-  id: number
-  cliente_id: number
-  motorista_id: number
-  veiculo_id: number
-  tipo_carga_id: number
-  origem: string
-  destino: string
+  id: string
+  cliente_id: string
+  motorista_id: string
+  veiculo_id: string
+  tipo_carga_id: string
+  origem_cidade: string
+  origem_uf: string
+  destino_cidade: string
+  destino_uf: string
   data_saida: string
-  data_previsao_chegada: string
-  distancia_km: number
-  peso_carga_kg: number
-  valor_frete: number
+  data_chegada_prevista: string
+  distancia_km: string
+  peso_carga_kg: string
+  valor_frete: string
+  km_inicial: string
+  km_final?: string
   status: ViagemStatus
-  descricao_carga: string
   observacoes: string
 }
 
@@ -49,44 +54,46 @@ export type ViagemListItem = Viagem & {
 type ListViagensParams = {
   search?: string
   status?: string
-  data_inicio?: string
-  data_fim?: string
+  data_saida_de?: string
+  data_saida_ate?: string
   page?: number
   limit?: number
 }
 
 type ViagemPayload = {
-  cliente_id: number
-  motorista_id: number
-  veiculo_id: number
-  tipo_carga_id: number
-  origem: string
-  destino: string
+  cliente_id?: string
+  motorista_id: string
+  veiculo_id: string
+  tipo_carga_id?: string
+  origem_cidade: string
+  origem_uf: string
+  destino_cidade: string
+  destino_uf: string
   data_saida: string
-  data_previsao_chegada: string
+  data_chegada_prevista: string
   distancia_km: string
   peso_carga_kg: string
   valor_frete: string
-  status: ViagemStatus
-  descricao_carga: string
+  km_inicial: string
   observacoes: string
 }
 
 function normalizeViagemPayload(payload: ViagemFormData): ViagemPayload {
   return {
-    cliente_id: Number(payload.cliente_id),
-    motorista_id: Number(payload.motorista_id),
-    veiculo_id: Number(payload.veiculo_id),
-    tipo_carga_id: Number(payload.tipo_carga_id),
-    origem: payload.origem.trim(),
-    destino: payload.destino.trim(),
+    cliente_id: payload.cliente_id || undefined,
+    motorista_id: payload.motorista_id,
+    veiculo_id: payload.veiculo_id,
+    tipo_carga_id: payload.tipo_carga_id || undefined,
+    origem_cidade: payload.origem_cidade.trim(),
+    origem_uf: payload.origem_uf.trim().toUpperCase(),
+    destino_cidade: payload.destino_cidade.trim(),
+    destino_uf: payload.destino_uf.trim().toUpperCase(),
     data_saida: payload.data_saida,
-    data_previsao_chegada: payload.data_previsao_chegada,
+    data_chegada_prevista: payload.data_chegada_prevista,
     distancia_km: payload.distancia_km.trim(),
     peso_carga_kg: payload.peso_carga_kg.trim(),
     valor_frete: payload.valor_frete.trim(),
-    status: payload.status,
-    descricao_carga: payload.descricao_carga.trim(),
+    km_inicial: payload.km_inicial.trim(),
     observacoes: payload.observacoes.trim(),
   }
 }

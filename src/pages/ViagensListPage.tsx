@@ -4,7 +4,7 @@ import { viagemService, type ViagemListItem, type ViagemStatus } from '../servic
 
 const statusOptions: Array<{ value: '' | ViagemStatus; label: string }> = [
   { value: '', label: 'Todos os status' },
-  { value: 'planejada', label: 'Planejada' },
+  { value: 'pendente', label: 'Pendente' },
   { value: 'em_andamento', label: 'Em andamento' },
   { value: 'concluida', label: 'Concluida' },
   { value: 'cancelada', label: 'Cancelada' },
@@ -23,8 +23,9 @@ function formatLabel(text: string) {
   return text.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value ?? 0)
+function formatCurrency(value: string | number) {
+  const parsed = Number(value ?? 0)
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number.isNaN(parsed) ? 0 : parsed)
 }
 
 function formatDateTime(value: string) {
@@ -44,8 +45,9 @@ function formatDateTime(value: string) {
   }).format(date)
 }
 
-function formatNumber(value: number, suffix: string) {
-  return `${new Intl.NumberFormat('pt-BR').format(value ?? 0)} ${suffix}`
+function formatNumber(value: string | number, suffix: string) {
+  const parsed = Number(value ?? 0)
+  return `${new Intl.NumberFormat('pt-BR').format(Number.isNaN(parsed) ? 0 : parsed)} ${suffix}`
 }
 
 export function ViagensListPage() {
@@ -77,8 +79,8 @@ export function ViagensListPage() {
       const response = await viagemService.list({
         search: nextSearch,
         status: nextStatus,
-        data_inicio: nextDataInicio,
-        data_fim: nextDataFim,
+        data_saida_de: nextDataInicio,
+        data_saida_ate: nextDataFim,
         page: nextPage,
         limit: nextLimit,
       })
@@ -93,7 +95,7 @@ export function ViagensListPage() {
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     const confirmed = window.confirm('Deseja realmente excluir esta viagem?')
 
     if (!confirmed) {
@@ -235,12 +237,12 @@ export function ViagensListPage() {
                   >
                     <button className="entity-table__main entity-table__main--viagens" type="button" onClick={() => setSelectedViagem(item)}>
                       <span>
-                        <strong>{item.origem} → {item.destino}</strong>
-                        <small>{item.tipo_carga_nome ?? item.descricao_carga ?? 'Carga nao informada'}</small>
+                        <strong>{`${item.origem_cidade}/${item.origem_uf} → ${item.destino_cidade}/${item.destino_uf}`}</strong>
+                        <small>{item.tipo_carga_nome ?? 'Carga nao informada'}</small>
                       </span>
                       <span>
                         <strong>{formatDateTime(item.data_saida)}</strong>
-                        <small>Prev. {formatDateTime(item.data_previsao_chegada)}</small>
+                        <small>Prev. {formatDateTime(item.data_chegada_prevista)}</small>
                       </span>
                       <span>
                         <strong>{item.motorista_nome ?? `Motorista #${item.motorista_id}`}</strong>
@@ -282,7 +284,7 @@ export function ViagensListPage() {
           <div className="entity-card__header">
             <div>
               <h2>Painel da viagem</h2>
-              <p>{selectedViagem ? `${selectedViagem.origem} para ${selectedViagem.destino}` : 'Selecione uma viagem'}</p>
+              <p>{selectedViagem ? `${selectedViagem.origem_cidade}/${selectedViagem.origem_uf} para ${selectedViagem.destino_cidade}/${selectedViagem.destino_uf}` : 'Selecione uma viagem'}</p>
             </div>
           </div>
 
@@ -325,8 +327,8 @@ export function ViagensListPage() {
                 <div>
                   <h3>Carga e agenda</h3>
                   <div className="entity-timeline__item">
-                    <strong>{selectedViagem.tipo_carga_nome ?? selectedViagem.descricao_carga ?? 'Carga nao informada'}</strong>
-                    <span>Saida {formatDateTime(selectedViagem.data_saida)} · previsao {formatDateTime(selectedViagem.data_previsao_chegada)}</span>
+                    <strong>{selectedViagem.tipo_carga_nome ?? 'Carga nao informada'}</strong>
+                    <span>Saida {formatDateTime(selectedViagem.data_saida)} · previsao {formatDateTime(selectedViagem.data_chegada_prevista)}</span>
                   </div>
                   {selectedViagem.observacoes ? (
                     <div className="entity-timeline__item">
