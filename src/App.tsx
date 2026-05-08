@@ -7,6 +7,8 @@ import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { DashboardPage } from './pages/DashboardPage'
+import { FuncionarioFormPage } from './pages/FuncionarioFormPage'
+import { FuncionariosListPage } from './pages/FuncionariosListPage'
 import { HistoricoAlteracoesPage } from './pages/HistoricoAlteracoesPage'
 import { ManutencaoFormPage } from './pages/ManutencaoFormPage'
 import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
@@ -45,8 +47,9 @@ function App() {
           <Route path="tipos-carga/listar" element={<TiposCargaListPage />} />
           <Route path="tipos-carga/novo" element={<TipoCargaFormPage />} />
           <Route path="tipos-carga/:id/editar" element={<TipoCargaFormPage />} />
-          <Route path="funcionarios/listar" element={<SectionPage />} />
-          <Route path="funcionarios/novo" element={<SectionPage />} />
+          <Route path="funcionarios/listar" element={<FuncionariosListPage />} />
+          <Route path="funcionarios/novo" element={<FuncionarioFormPage />} />
+          <Route path="funcionarios/:id/editar" element={<FuncionarioFormPage />} />
           <Route path="motoristas/listar" element={<MotoristasListPage />} />
           <Route path="motoristas/novo" element={<MotoristaFormPage />} />
           <Route path="motoristas/:id/editar" element={<MotoristaFormPage />} />

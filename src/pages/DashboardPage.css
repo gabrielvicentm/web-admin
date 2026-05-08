@@ -1173,6 +1173,11 @@ body {
   color: #ffd389;
 }
 
+.entity-status--desligado {
+  background: rgba(142, 160, 190, 0.22);
+  color: #e1e8f6;
+}
+
 .entity-status--agendada {
   background: rgba(76, 141, 255, 0.14);
   color: #9cc0ff;
