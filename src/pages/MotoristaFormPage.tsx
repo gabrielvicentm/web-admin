@@ -107,6 +107,20 @@ function buildApiDate(value: string) {
   }
 
   const [, day, month, year] = match
+  const normalizedDay = Number(day)
+  const normalizedMonth = Number(month)
+  const normalizedYear = Number(year)
+  const parsedDate = new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay))
+
+  if (
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.getUTCFullYear() !== normalizedYear ||
+    parsedDate.getUTCMonth() !== normalizedMonth - 1 ||
+    parsedDate.getUTCDate() !== normalizedDay
+  ) {
+    return ''
+  }
+
   return `${year}-${month}-${day}`
 }
 
@@ -253,6 +267,21 @@ export function MotoristaFormPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    if (!formData.data_admissao) {
+      setFeedback('Informe a data de admissao no formato dd/mm/aaaa.')
+      return
+    }
+
+    if (!formData.validade_cnh) {
+      setFeedback('Informe a validade da CNH no formato dd/mm/aaaa.')
+      return
+    }
+
+    if (!isEditing && (formData.senha_inicial?.length ?? 0) < 6) {
+      setFeedback('A senha inicial deve ter pelo menos 6 caracteres.')
+      return
+    }
+
     try {
       setIsSaving(true)
       setFeedback('')
@@ -272,7 +301,20 @@ export function MotoristaFormPage() {
       }
 
       navigate('/dashboard/motoristas/listar', { replace: true })
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const apiMessage = typeof error.response?.data?.error === 'string'
+          ? error.response.data.error
+          : typeof error.response?.data?.message === 'string'
+            ? error.response.data.message
+            : ''
+
+        if (apiMessage) {
+          setFeedback(apiMessage)
+          return
+        }
+      }
+
       setFeedback('Nao foi possivel salvar o motorista. Revise os dados e tente novamente.')
     } finally {
       setIsSaving(false)
@@ -397,6 +439,7 @@ export function MotoristaFormPage() {
                 type="password"
                 value={isEditing ? formData.nova_senha ?? '' : formData.senha_inicial ?? ''}
                 onChange={handleChange}
+                minLength={isEditing ? undefined : 6}
                 required={!isEditing}
               />
             </label>
