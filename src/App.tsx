@@ -7,6 +7,7 @@ import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { DashboardPage } from './pages/DashboardPage'
+import { FolhaPagamentoPage } from './pages/FolhaPagamentoPage'
 import { FuncionarioFormPage } from './pages/FuncionarioFormPage'
 import { FuncionariosListPage } from './pages/FuncionariosListPage'
 import { HistoricoAlteracoesPage } from './pages/HistoricoAlteracoesPage'
@@ -59,7 +60,7 @@ function App() {
           <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
-          <Route path="folha-pagamento" element={<SectionPage />} />
+          <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />
         </Route>

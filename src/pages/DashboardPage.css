@@ -1516,6 +1516,115 @@ body {
   overflow-wrap: anywhere;
 }
 
+.folha-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.4fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.folha-panel {
+  min-width: 0;
+}
+
+.folha-subcard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(125, 154, 196, 0.08);
+}
+
+.folha-list {
+  display: grid;
+  gap: 12px;
+}
+
+.folha-list__item {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(125, 154, 196, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.folha-list__item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(76, 141, 255, 0.22);
+}
+
+.folha-list__item.is-selected {
+  background: linear-gradient(135deg, rgba(38, 84, 146, 0.3), rgba(24, 42, 70, 0.82));
+  border-color: rgba(93, 153, 255, 0.34);
+}
+
+.folha-list__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.folha-list__header small,
+.folha-list__metrics small,
+.folha-list__meta span {
+  color: var(--dashboard-text-soft);
+}
+
+.folha-list__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.folha-list__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.folha-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.folha-breakdown__item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.folha-breakdown__item span {
+  display: block;
+  color: var(--dashboard-text-soft);
+  font-size: 0.82rem;
+}
+
+.folha-breakdown__item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.05rem;
+}
+
+.entity-status--aberta {
+  background: rgba(76, 141, 255, 0.14);
+  color: #9cc0ff;
+}
+
+.entity-status--fechada {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd389;
+}
+
+.entity-status--paga {
+  background: rgba(31, 210, 138, 0.14);
+  color: #91f0c5;
+}
+
 @media (max-width: 1240px) {
   .entity-grid {
     grid-template-columns: 1fr;
@@ -1541,6 +1650,7 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .folha-layout,
   .trip-selection-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1609,8 +1719,14 @@ body {
   }
 
   .entity-kpi-grid--4,
+  .folha-breakdown,
   .trip-detail-tabs,
   .history-change__values {
+    grid-template-columns: 1fr;
+  }
+
+  .folha-layout,
+  .folha-list__metrics {
     grid-template-columns: 1fr;
   }
 }
