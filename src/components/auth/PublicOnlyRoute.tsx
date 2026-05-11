@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { sessionService } from '../../services/sessionService'
 
 export function PublicOnlyRoute() {
-  if (sessionService.isAuthenticated()) {
+  if (sessionService.hasUsableSession()) {
     return <Navigate replace to="/dashboard" />
   }
 

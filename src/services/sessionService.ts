@@ -90,11 +90,12 @@ export const sessionService = {
       return
     }
 
+    const currentRefreshToken = window.localStorage.getItem(REFRESH_TOKEN_KEY) ?? ''
     const expiresAt = calculateExpiresAt(payload.access_token, normalizeExpiresIn(payload.expires_in))
     const user = normalizeUser(payload.user)
 
     window.localStorage.setItem(ACCESS_TOKEN_KEY, payload.access_token)
-    window.localStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh_token ?? '')
+    window.localStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh_token ?? currentRefreshToken)
     window.localStorage.setItem(TOKEN_TYPE_KEY, payload.token_type ?? 'Bearer')
     window.localStorage.setItem(EXPIRES_AT_KEY, String(expiresAt))
     window.localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -151,18 +152,55 @@ export const sessionService = {
     return this.getSession()?.accessToken ?? null
   },
 
-  isAuthenticated() {
+  getRefreshToken() {
+    return this.getSession()?.refreshToken ?? null
+  },
+
+  hasRefreshToken() {
+    return Boolean(this.getRefreshToken()?.trim())
+  },
+
+  isAccessTokenExpired(bufferMs = 0) {
+    const session = this.getSession()
+
+    if (!session) {
+      return true
+    }
+
+    return session.expiresAt <= Date.now() + bufferMs
+  },
+
+  isRefreshTokenExpired(bufferMs = 0) {
+    const refreshToken = this.getRefreshToken()
+
+    if (!refreshToken) {
+      return true
+    }
+
+    const refreshExpiresAt = getTokenExpiryFromJwt(refreshToken)
+
+    if (!refreshExpiresAt) {
+      return true
+    }
+
+    return refreshExpiresAt <= Date.now() + bufferMs
+  },
+
+  hasUsableSession(bufferMs = 0) {
     const session = this.getSession()
 
     if (!session) {
       return false
     }
 
-    if (session.expiresAt <= Date.now()) {
-      this.clearSession()
-      return false
+    if (!this.isAccessTokenExpired(bufferMs)) {
+      return true
     }
 
-    return true
+    return this.hasRefreshToken() && !this.isRefreshTokenExpired(bufferMs)
+  },
+
+  isAuthenticated() {
+    return this.hasUsableSession()
   },
 }
