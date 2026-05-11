@@ -108,20 +108,61 @@ function formatDateTime(value?: string) {
   }).format(date)
 }
 
-function toDateTimeLocal(value?: string) {
+function splitApiDateTime(value?: string) {
   if (!value) {
+    return { date: '', time: '' }
+  }
+
+  const normalized = value.trim()
+  const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/)
+
+  if (!match) {
+    return { date: '', time: '' }
+  }
+
+  const [, year, month, day, hour, minute] = match
+  return {
+    date: `${day}/${month}/${year}`,
+    time: `${hour}:${minute}`,
+  }
+}
+
+function formatBrazilianDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function formatTimeValue(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 4)
+
+  if (digits.length <= 2) {
+    return digits
+  }
+
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`
+}
+
+function buildApiDateTime(date: string, time: string) {
+  const dateMatch = date.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  const timeMatch = time.match(/^(\d{2}):(\d{2})$/)
+
+  if (!dateMatch || !timeMatch) {
     return ''
   }
 
-  const date = new Date(value)
+  const [, day, month, year] = dateMatch
+  const [, hour, minute] = timeMatch
 
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 16)
-  }
-
-  const offset = date.getTimezoneOffset()
-  const localDate = new Date(date.getTime() - offset * 60 * 1000)
-  return localDate.toISOString().slice(0, 16)
+  return `${year}-${month}-${day}T${hour}:${minute}`
 }
 
 function buildFormState(viagem: ViagemDetalhe): ViagemFormData {
@@ -134,8 +175,8 @@ function buildFormState(viagem: ViagemDetalhe): ViagemFormData {
     origem_uf: viagem.origem_uf ?? '',
     destino_cidade: viagem.destino_cidade ?? '',
     destino_uf: viagem.destino_uf ?? '',
-    data_saida: toDateTimeLocal(viagem.data_saida),
-    data_chegada_prevista: toDateTimeLocal(viagem.data_chegada_prevista),
+    data_saida: viagem.data_saida ?? '',
+    data_chegada_prevista: viagem.data_chegada_prevista ?? '',
     distancia_km: String(viagem.distancia_km ?? ''),
     peso_carga_kg: String(viagem.peso_carga_kg ?? ''),
     valor_frete: String(viagem.valor_frete ?? ''),
@@ -173,6 +214,10 @@ export function ViagemDetailPage() {
   const { id } = useParams()
   const [viagem, setViagem] = useState<ViagemDetalhe | null>(null)
   const [formData, setFormData] = useState<ViagemFormData>(initialFormState)
+  const [dataSaidaDate, setDataSaidaDate] = useState('')
+  const [dataSaidaTime, setDataSaidaTime] = useState('')
+  const [dataChegadaDate, setDataChegadaDate] = useState('')
+  const [dataChegadaTime, setDataChegadaTime] = useState('')
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [motoristas, setMotoristas] = useState<MotoristaListItem[]>([])
   const [veiculos, setVeiculos] = useState<VeiculoListItem[]>([])
@@ -296,9 +341,55 @@ export function ViagemDetailPage() {
     })
   }, [loadOptions])
 
+  useEffect(() => {
+    const saida = splitApiDateTime(formData.data_saida)
+    setDataSaidaDate(saida.date)
+    setDataSaidaTime(saida.time)
+
+    const chegada = splitApiDateTime(formData.data_chegada_prevista)
+    setDataChegadaDate(chegada.date)
+    setDataChegadaTime(chegada.time)
+  }, [formData.data_saida, formData.data_chegada_prevista])
+
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
     setFormData((current) => ({ ...current, [name]: value }))
+  }
+
+  function handleDateTimeFieldChange(field: 'data_saida' | 'data_chegada_prevista', part: 'date' | 'time', value: string) {
+    const formattedValue = part === 'date' ? formatBrazilianDate(value) : formatTimeValue(value)
+
+    if (field === 'data_saida') {
+      const nextDate = part === 'date' ? formattedValue : dataSaidaDate
+      const nextTime = part === 'time' ? formattedValue : dataSaidaTime
+
+      if (part === 'date') {
+        setDataSaidaDate(formattedValue)
+      } else {
+        setDataSaidaTime(formattedValue)
+      }
+
+      setFormData((current) => ({
+        ...current,
+        data_saida: buildApiDateTime(nextDate, nextTime),
+      }))
+
+      return
+    }
+
+    const nextDate = part === 'date' ? formattedValue : dataChegadaDate
+    const nextTime = part === 'time' ? formattedValue : dataChegadaTime
+
+    if (part === 'date') {
+      setDataChegadaDate(formattedValue)
+    } else {
+      setDataChegadaTime(formattedValue)
+    }
+
+    setFormData((current) => ({
+      ...current,
+      data_chegada_prevista: buildApiDateTime(nextDate, nextTime),
+    }))
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -554,11 +645,55 @@ export function ViagemDetailPage() {
               </label>
               <label className="entity-field">
                 <span>Data de saida</span>
-                <input name="data_saida" type="datetime-local" value={formData.data_saida} onChange={handleChange} required />
+                <input
+                  name="data_saida_data"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="dd/mm/aaaa"
+                  value={dataSaidaDate}
+                  onChange={(event) => handleDateTimeFieldChange('data_saida', 'date', event.target.value)}
+                  required
+                />
+                <small>Formato brasileiro: dia/mes/ano</small>
+              </label>
+              <label className="entity-field">
+                <span>Hora de saida</span>
+                <input
+                  name="data_saida_hora"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="08:30"
+                  value={dataSaidaTime}
+                  onChange={(event) => handleDateTimeFieldChange('data_saida', 'time', event.target.value)}
+                  required
+                />
+                <small>Use o formato 24 horas</small>
               </label>
               <label className="entity-field">
                 <span>Previsao de chegada</span>
-                <input name="data_chegada_prevista" type="datetime-local" value={formData.data_chegada_prevista} onChange={handleChange} required />
+                <input
+                  name="data_chegada_prevista_data"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="dd/mm/aaaa"
+                  value={dataChegadaDate}
+                  onChange={(event) => handleDateTimeFieldChange('data_chegada_prevista', 'date', event.target.value)}
+                  required
+                />
+                <small>Formato brasileiro: dia/mes/ano</small>
+              </label>
+              <label className="entity-field">
+                <span>Hora prevista de chegada</span>
+                <input
+                  name="data_chegada_prevista_hora"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="17:45"
+                  value={dataChegadaTime}
+                  onChange={(event) => handleDateTimeFieldChange('data_chegada_prevista', 'time', event.target.value)}
+                  required
+                />
+                <small>Use o formato 24 horas</small>
               </label>
               <label className="entity-field">
                 <span>Distancia (km)</span>
