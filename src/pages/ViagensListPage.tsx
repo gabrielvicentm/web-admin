@@ -83,10 +83,15 @@ function formatNumber(value: string | number, suffix: string) {
   return `${new Intl.NumberFormat('pt-BR').format(Number.isNaN(parsed) ? 0 : parsed)} ${suffix}`
 }
 
-export function ViagensListPage() {
+type ViagensListPageProps = {
+  mode?: 'default' | 'historico-finalizadas'
+}
+
+export function ViagensListPage({ mode = 'default' }: ViagensListPageProps) {
+  const initialStatus = mode === 'historico-finalizadas' ? 'concluida' : ''
   const [items, setItems] = useState<ViagemListItem[]>([])
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(initialStatus)
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [dataInicioInput, setDataInicioInput] = useState('')
@@ -97,6 +102,11 @@ export function ViagensListPage() {
   const [selectedViagem, setSelectedViagem] = useState<ViagemListItem | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+
+  const pageTitle = mode === 'historico-finalizadas' ? 'Historico de viagens finalizadas' : 'Viagens'
+  const pageSubtitle = mode === 'historico-finalizadas'
+    ? 'Consulte as viagens concluidas com foco em encerramento operacional, agenda cumprida e leitura historica.'
+    : 'Acompanhe rotas, agenda, carga, frete e situacao operacional das viagens cadastradas.'
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -154,13 +164,13 @@ export function ViagensListPage() {
 
   function handleClearFilters() {
     setSearch('')
-    setStatus('')
+    setStatus(initialStatus)
     setDataInicio('')
     setDataFim('')
     setDataInicioInput('')
     setDataFimInput('')
     setPage(1)
-    void loadViagens({ search: '', status: '', dataInicio: '', dataFim: '', page: 1 })
+    void loadViagens({ search: '', status: initialStatus, dataInicio: '', dataFim: '', page: 1 })
   }
 
   useEffect(() => {
@@ -171,20 +181,39 @@ export function ViagensListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, status])
 
+  useEffect(() => {
+    setSearch('')
+    setStatus(initialStatus)
+    setDataInicio('')
+    setDataFim('')
+    setDataInicioInput('')
+    setDataFimInput('')
+    setPage(1)
+    void loadViagens({ search: '', status: initialStatus, dataInicio: '', dataFim: '', page: 1 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, initialStatus])
+
   return (
     <section className="entity-page">
       <header className="entity-page__hero">
         <div>
           <p className="dashboard-eyebrow">Operacao</p>
-          <h1 className="dashboard-title">Viagens</h1>
-          <p className="dashboard-subtitle">
-            Acompanhe rotas, agenda, carga, frete e situacao operacional das viagens cadastradas.
-          </p>
+          <h1 className="dashboard-title">{pageTitle}</h1>
+          <p className="dashboard-subtitle">{pageSubtitle}</p>
         </div>
         <div className="entity-page__hero-actions">
           <button className="dashboard-chip" type="button" onClick={() => void loadViagens()}>
             Atualizar lista
           </button>
+          {mode === 'default' ? (
+            <Link className="entity-action entity-action--secondary" to="/dashboard/viagens/finalizadas">
+              Historico finalizadas
+            </Link>
+          ) : (
+            <Link className="entity-action entity-action--secondary" to="/dashboard/viagens/listar">
+              Voltar para viagens
+            </Link>
+          )}
           <Link className="entity-action entity-action--primary" to="/dashboard/viagens/nova">
             Nova viagem
           </Link>
@@ -295,7 +324,11 @@ export function ViagensListPage() {
                       </span>
                       <span>
                         <strong>{formatDateTime(item.data_saida)}</strong>
-                        <small>Prev. {formatDateTime(item.data_chegada_prevista)}</small>
+                        <small>
+                          {item.status === 'concluida' && item.data_chegada_real
+                            ? `Concluida ${formatDateTime(item.data_chegada_real)}`
+                            : `Prev. ${formatDateTime(item.data_chegada_prevista)}`}
+                        </small>
                       </span>
                       <span>
                         <strong>{item.motorista_nome ?? `Motorista #${item.motorista_id}`}</strong>

@@ -37,6 +37,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<DashboardHome />} />
           <Route path="viagens/listar" element={<ViagensListPage />} />
+          <Route path="viagens/finalizadas" element={<ViagensListPage mode="historico-finalizadas" />} />
           <Route path="viagens/nova" element={<ViagemFormPage />} />
           <Route path="viagens/:id/editar" element={<ViagemDetailPage />} />
           <Route path="veiculos/listar" element={<VeiculosListPage />} />

@@ -254,8 +254,8 @@ export function ViagemFormPage() {
     try {
       setIsSaving(true)
       setFeedback('')
-      await viagemService.create(formData)
-      navigate('/dashboard/viagens/listar', { replace: true })
+      const response = await viagemService.create(formData)
+      navigate(`/dashboard/viagens/${response.data.id}/editar`, { replace: true })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const apiMessage =

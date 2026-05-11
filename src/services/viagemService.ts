@@ -34,6 +34,7 @@ export type Viagem = {
   destino_uf: string
   data_saida: string
   data_chegada_prevista: string
+  data_chegada_real?: string
   distancia_km: string
   peso_carga_kg: string
   valor_frete: string
@@ -64,12 +65,9 @@ export type ViagemDocumento = {
   id: string | number
   nome?: string
   tipo?: string
-  status?: string
-  numero?: string
-  data_emissao?: string
-  data_validade?: string
+  tamanho_bytes?: number
+  created_at?: string
   url?: string
-  observacoes?: string
 }
 
 export type ViagemOcorrencia = {
@@ -101,6 +99,17 @@ export type ViagemDetalhe = ViagemListItem & {
   abastecimentos?: ViagemAbastecimento[]
 }
 
+export type ViagemFinalizacao = {
+  id: string | number
+  viagem_id: string
+  km_final: string
+  status: string
+  observacao_motorista?: string
+  observacao_admin?: string
+  solicitado_em?: string
+  respondido_em?: string
+}
+
 type ListViagensParams = {
   search?: string
   status?: string
@@ -125,7 +134,23 @@ type ViagemPayload = {
   peso_carga_kg: string
   valor_frete: string
   km_inicial: string
+  status?: ViagemStatus
   observacoes: string
+}
+
+type ViagemFinalizarPayload = {
+  km_final: string
+  data_chegada_real: string
+  observacao_admin: string
+}
+
+type ApiViagemHistoricoItem = {
+  id: string | number
+  usuario_tipo?: string
+  campo_alterado?: string
+  valor_novo?: string
+  descricao?: string
+  created_at?: string
 }
 
 function normalizeViagemPayload(payload: ViagemFormData): ViagemPayload {
@@ -144,6 +169,7 @@ function normalizeViagemPayload(payload: ViagemFormData): ViagemPayload {
     peso_carga_kg: payload.peso_carga_kg.trim(),
     valor_frete: payload.valor_frete.trim(),
     km_inicial: payload.km_inicial.trim(),
+    status: payload.status,
     observacoes: payload.observacoes.trim(),
   }
 }
@@ -175,12 +201,65 @@ export const viagemService = {
   },
 
   async getTimeline(id: string | number) {
-    const response = await api.get<ApiResponse<ViagemTimelineItem[]>>(`/admin/viagens/${id}/timeline`)
-    return response.data
+    const response = await api.get<ApiResponse<ApiViagemHistoricoItem[]>>(`/admin/viagens/${id}/historico`)
+
+    return {
+      ...response.data,
+      data: response.data.data.map((item) => ({
+        id: item.id,
+        titulo: item.campo_alterado ? item.campo_alterado.replace(/_/g, ' ') : `Acao ${item.usuario_tipo ?? 'sistema'}`,
+        descricao: item.descricao,
+        status: item.campo_alterado === 'status' ? item.valor_novo : item.usuario_tipo,
+        data_evento: item.created_at,
+      })),
+    }
   },
 
   async getDocumentos(id: string | number) {
     const response = await api.get<ApiResponse<ViagemDocumento[]>>(`/admin/viagens/${id}/documentos`)
+    return response.data
+  },
+
+  async uploadDocumentos(id: string | number, files: File[]) {
+    const formData = new FormData()
+    for (const file of files) {
+      formData.append('documentos', file)
+    }
+
+    const response = await api.post<ApiResponse<ViagemDocumento[]>>(`/admin/viagens/${id}/documentos`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  },
+
+  async downloadDocumento(viagemId: string | number, documentoId: string | number, fallbackName?: string) {
+    const response = await api.get<BlobPart>(`/admin/viagens/${viagemId}/documentos/${documentoId}`, {
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response.data], {
+      type: response.headers['content-type'] || 'application/octet-stream',
+    })
+
+    const objectUrl = window.URL.createObjectURL(blob)
+    const anchor = window.document.createElement('a')
+    anchor.href = objectUrl
+    anchor.download = fallbackName || 'documento-viagem'
+    window.document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    window.URL.revokeObjectURL(objectUrl)
+  },
+
+  async getFinalizacoes(id: string | number) {
+    const response = await api.get<ApiResponse<ViagemFinalizacao[]>>(`/admin/viagens/${id}/finalizacoes`)
+    return response.data
+  },
+
+  async finalize(id: string | number, payload: ViagemFinalizarPayload) {
+    const response = await api.post<ApiResponse<ViagemDetalhe>>(`/admin/viagens/${id}/finalizar`, payload)
     return response.data
   },
 

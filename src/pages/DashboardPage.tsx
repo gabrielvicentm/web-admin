@@ -39,6 +39,7 @@ const navigationItems: DashboardNavItem[] = [
     icon: RouteIcon,
     children: [
       { label: 'Listar viagens', icon: ListIcon, to: '/dashboard/viagens/listar' },
+      { label: 'Historico finalizadas', icon: ListIcon, to: '/dashboard/viagens/finalizadas' },
       { label: 'Nova viagem', icon: PlusIcon, to: '/dashboard/viagens/nova' },
     ],
   },
