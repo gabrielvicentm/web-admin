@@ -34,6 +34,15 @@ function getEditRoute(item: FuncionarioListItem) {
   return `/dashboard/funcionarios/${item.id}/editar`
 }
 
+function getInitials(nome: string) {
+  return nome
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
 export function FuncionariosListPage() {
   const [items, setItems] = useState<FuncionarioListItem[]>([])
   const [search, setSearch] = useState('')
@@ -221,11 +230,20 @@ export function FuncionariosListPage() {
               {items.map((item) => (
                 <div className="entity-table__row entity-table__row--motoristas" key={item.id}>
                   <div className="entity-table__main entity-table__main--motoristas">
-                    <span className="entity-table__cell entity-table__cell--motorista">
+                      <span className="entity-table__cell entity-table__cell--motorista">
                       <span className="entity-person entity-person--motorista">
-                        <span className="entity-person__avatar entity-person__avatar--motorista entity-person__avatar--placeholder">
-                          {item.nome.slice(0, 1)}
-                        </span>
+                        {item.foto_url ? (
+                          <img
+                            className="entity-person__avatar entity-person__avatar--motorista"
+                            src={item.foto_url}
+                            alt={`Foto de ${item.nome}`}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span className="entity-person__avatar entity-person__avatar--motorista entity-person__avatar--placeholder">
+                            {getInitials(item.nome)}
+                          </span>
+                        )}
                         <span className="entity-person__content">
                           <strong>{item.nome}</strong>
                           <small>

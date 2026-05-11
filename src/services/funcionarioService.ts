@@ -11,6 +11,7 @@ export type FuncionarioListItem = {
   id: string
   nome: string
   cpf: string
+  foto_url?: string
   telefone: string
   email: string
   cargo: string
@@ -102,25 +103,75 @@ type ListFuncionariosParams = {
   include_motoristas?: boolean
 }
 
+type ApiFuncionarioImageFields = {
+  foto_url?: string | null
+}
+
+const r2PublicBaseUrl = 'https://pub-f4e4a14a40454d748b2db48ccf60e04c.r2.dev'
+
+function resolveFuncionarioPhotoUrl(value?: string | null) {
+  if (!value) {
+    return undefined
+  }
+
+  const normalizedValue = value.trim()
+  if (!normalizedValue) {
+    return undefined
+  }
+
+  if (/^https?:\/\//i.test(normalizedValue) || normalizedValue.startsWith('data:') || normalizedValue.startsWith('blob:')) {
+    return normalizedValue
+  }
+
+  if (r2PublicBaseUrl) {
+    return new URL(normalizedValue.replace(/^\/+/, ''), `${r2PublicBaseUrl.replace(/\/+$/, '')}/`).toString()
+  }
+
+  return normalizedValue
+}
+
+function normalizeFuncionario<T extends FuncionarioListItem & ApiFuncionarioImageFields>(funcionario: T): T {
+  return {
+    ...funcionario,
+    foto_url: resolveFuncionarioPhotoUrl(funcionario.foto_url),
+  }
+}
+
 export const funcionarioService = {
   async list(params: ListFuncionariosParams) {
-    const response = await api.get<PaginatedApiResponse<FuncionarioListItem[]>>('/admin/funcionarios', { params })
-    return response.data
+    const response = await api.get<PaginatedApiResponse<Array<FuncionarioListItem & ApiFuncionarioImageFields>>>('/admin/funcionarios', { params })
+
+    return {
+      ...response.data,
+      data: response.data.data.map((item) => normalizeFuncionario(item)),
+    }
   },
 
   async getById(id: string) {
-    const response = await api.get<ApiResponse<Funcionario>>(`/admin/funcionarios/${id}`)
-    return response.data
+    const response = await api.get<ApiResponse<Funcionario & ApiFuncionarioImageFields>>(`/admin/funcionarios/${id}`)
+
+    return {
+      ...response.data,
+      data: normalizeFuncionario(response.data.data),
+    }
   },
 
   async create(payload: FuncionarioFormData) {
-    const response = await api.post<ApiResponse<Funcionario>>('/admin/funcionarios', payload)
-    return response.data
+    const response = await api.post<ApiResponse<Funcionario & ApiFuncionarioImageFields>>('/admin/funcionarios', payload)
+
+    return {
+      ...response.data,
+      data: normalizeFuncionario(response.data.data),
+    }
   },
 
   async update(id: string, payload: FuncionarioFormData) {
-    const response = await api.put<ApiResponse<Funcionario>>(`/admin/funcionarios/${id}`, payload)
-    return response.data
+    const response = await api.put<ApiResponse<Funcionario & ApiFuncionarioImageFields>>(`/admin/funcionarios/${id}`, payload)
+
+    return {
+      ...response.data,
+      data: normalizeFuncionario(response.data.data),
+    }
   },
 
   async remove(id: string) {
@@ -129,7 +180,27 @@ export const funcionarioService = {
   },
 
   async updateStatus(id: string, status: FuncionarioStatus) {
-    const response = await api.patch<ApiResponse<Funcionario>>(`/admin/funcionarios/${id}/status`, { status })
-    return response.data
+    const response = await api.patch<ApiResponse<Funcionario & ApiFuncionarioImageFields>>(`/admin/funcionarios/${id}/status`, { status })
+
+    return {
+      ...response.data,
+      data: normalizeFuncionario(response.data.data),
+    }
+  },
+
+  async uploadPhoto(id: string, file: File) {
+    const formData = new FormData()
+    formData.append('foto', file)
+
+    const response = await api.post<ApiResponse<Funcionario & ApiFuncionarioImageFields>>(`/admin/funcionarios/${id}/foto`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    return {
+      ...response.data,
+      data: normalizeFuncionario(response.data.data),
+    }
   },
 }

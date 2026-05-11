@@ -133,6 +133,9 @@ export function FuncionarioFormPage() {
   const [dataNascimentoInput, setDataNascimentoInput] = useState('')
   const [dataAdmissaoInput, setDataAdmissaoInput] = useState('')
   const [dataDemissaoInput, setDataDemissaoInput] = useState('')
+  const [fotoFile, setFotoFile] = useState<File | null>(null)
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState('')
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState('')
   const [isLoading, setIsLoading] = useState(isEditing)
   const [isSaving, setIsSaving] = useState(false)
   const [isFetchingCep, setIsFetchingCep] = useState(false)
@@ -140,6 +143,15 @@ export function FuncionarioFormPage() {
   const [isMotorista, setIsMotorista] = useState(false)
 
   const pageTitle = useMemo(() => (isEditing ? 'Editar funcionario' : 'Novo funcionario'), [isEditing])
+  const displayedPhotoUrl = photoPreviewUrl || currentPhotoUrl
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl)
+      }
+    }
+  }, [photoPreviewUrl])
 
   useEffect(() => {
     if (!id) {
@@ -158,6 +170,7 @@ export function FuncionarioFormPage() {
           ...initialFormState,
           ...response.data,
         })
+        setCurrentPhotoUrl(response.data.foto_url ?? '')
       } catch {
         setFeedback('Nao foi possivel carregar os dados do funcionario.')
       } finally {
@@ -225,6 +238,23 @@ export function FuncionarioFormPage() {
     }))
   }
 
+  function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextFile = event.target.files?.[0] ?? null
+
+    setFotoFile(nextFile)
+
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl)
+    }
+
+    if (nextFile) {
+      setPhotoPreviewUrl(URL.createObjectURL(nextFile))
+      return
+    }
+
+    setPhotoPreviewUrl('')
+  }
+
   async function handleCepBlur() {
     const cep = formData.cep.replace(/\D/g, '')
     if (cep.length !== 8) {
@@ -264,10 +294,12 @@ export function FuncionarioFormPage() {
       setIsSaving(true)
       setFeedback('')
 
-      if (isEditing && id) {
-        await funcionarioService.update(id, formData)
-      } else {
-        await funcionarioService.create(formData)
+      const response = isEditing && id
+        ? await funcionarioService.update(id, formData)
+        : await funcionarioService.create(formData)
+
+      if (fotoFile) {
+        await funcionarioService.uploadPhoto(response.data.id, fotoFile)
       }
 
       navigate('/dashboard/funcionarios/listar', { replace: true })
@@ -580,15 +612,27 @@ export function FuncionarioFormPage() {
         <article className="entity-card">
           <div className="entity-card__header">
             <div>
-              <h2>Observacoes</h2>
-              <p>Espaco para registrar orientacoes internas relevantes para RH e gestores.</p>
+              <h2>Foto e observacoes</h2>
+              <p>Imagem do colaborador para identificacao visual nas listagens e observacoes gerais.</p>
             </div>
           </div>
 
-          <label className="entity-field">
-            <span>Observacoes gerais</span>
-            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
-          </label>
+          <div className="entity-form__grid entity-form__grid--2">
+            <div className="entity-photo-uploader">
+              {displayedPhotoUrl ? (
+                <img className="entity-photo-uploader__preview" src={displayedPhotoUrl} alt="Pre-visualizacao da foto do funcionario" />
+              ) : null}
+              <label className="entity-field">
+                <span>Foto do funcionario</span>
+                <input type="file" accept="image/*" onChange={handlePhotoChange} />
+              </label>
+            </div>
+
+            <label className="entity-field">
+              <span>Observacoes gerais</span>
+              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+            </label>
+          </div>
         </article>
 
         <div className="entity-form__actions">
