@@ -115,6 +115,7 @@ type ListViagensParams = {
   status?: string
   data_saida_de?: string
   data_saida_ate?: string
+  exclude_concluidas?: boolean
   page?: number
   limit?: number
 }
@@ -235,18 +236,22 @@ export const viagemService = {
   },
 
   async downloadDocumento(viagemId: string | number, documentoId: string | number, fallbackName?: string) {
-    const response = await api.get<BlobPart>(`/admin/viagens/${viagemId}/documentos/${documentoId}`, {
-      responseType: 'blob',
+    const response = await api.get<ArrayBuffer>(`/admin/viagens/${viagemId}/documentos/${documentoId}`, {
+      responseType: 'arraybuffer',
     })
 
     const blob = new Blob([response.data], {
       type: response.headers['content-type'] || 'application/octet-stream',
     })
 
+    const contentDisposition = response.headers['content-disposition'] || ''
+    const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+    const filename = filenameMatch?.[1] || fallbackName || 'documento-viagem'
+
     const objectUrl = window.URL.createObjectURL(blob)
     const anchor = window.document.createElement('a')
     anchor.href = objectUrl
-    anchor.download = fallbackName || 'documento-viagem'
+    anchor.download = filename
     window.document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()

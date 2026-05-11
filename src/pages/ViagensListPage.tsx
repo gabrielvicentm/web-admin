@@ -126,6 +126,7 @@ export function ViagensListPage({ mode = 'default' }: ViagensListPageProps) {
         status: nextStatus,
         data_saida_de: nextDataInicio,
         data_saida_ate: nextDataFim,
+        exclude_concluidas: mode === 'default',
         page: nextPage,
         limit: nextLimit,
       })
