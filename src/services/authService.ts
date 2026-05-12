@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { api } from './api'
+import { getHttpErrorMessage } from './httpError'
 import { sessionService, type AuthUser } from './sessionService'
 
 type AdminLoginPayload = {
@@ -48,7 +49,7 @@ function getLoginErrorMessage(error: unknown) {
     }
   }
 
-  return 'Nao foi possivel realizar o login agora.'
+  return getHttpErrorMessage(error, 'Nao foi possivel realizar o login agora.')
 }
 
 export const authService = {

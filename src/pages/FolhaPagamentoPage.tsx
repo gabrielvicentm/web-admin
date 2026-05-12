@@ -7,6 +7,7 @@ import {
   type FolhaPagamentoResumo,
   type FolhaPagamentoStatus,
 } from '../services/folhaPagamentoService'
+import { getHttpErrorMessage } from '../services/httpError'
 
 const formStatusOptions: FolhaPagamentoStatus[] = ['aberta', 'fechada', 'paga']
 
@@ -75,8 +76,8 @@ export function FolhaPagamentoPage() {
       setFeedback('')
       const response = await folhaPagamentoService.list({ competencia, search, status })
       setItems(response.data)
-    } catch {
-      setFeedback('Nao foi possivel carregar a folha de pagamento.')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar a folha de pagamento.'))
     } finally {
       setIsLoadingList(false)
     }
@@ -89,10 +90,10 @@ export function FolhaPagamentoPage() {
       const response = await folhaPagamentoService.getByFuncionario(funcionarioId, competencia)
       setDetail(response.data)
       setFormData(response.data.folha)
-    } catch {
+    } catch (error) {
       setDetail(null)
       setFormData(buildInitialFormData(competencia))
-      setFeedback('Nao foi possivel carregar os detalhes da folha do funcionario.')
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os detalhes da folha do funcionario.'))
     } finally {
       setIsLoadingDetail(false)
     }
@@ -185,8 +186,8 @@ export function FolhaPagamentoPage() {
       setFormData(response.data.folha)
       await loadList()
       setFeedback('Folha do funcionario salva com sucesso.')
-    } catch {
-      setFeedback('Nao foi possivel salvar a folha do funcionario.')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar a folha do funcionario.'))
     } finally {
       setIsSaving(false)
     }
@@ -338,19 +339,19 @@ export function FolhaPagamentoPage() {
                 <div className="entity-form__grid entity-form__grid--4">
                   <label className="entity-field">
                     <span>Salario base</span>
-                    <input name="salario_base_snapshot" type="number" min="0" step="0.01" value={formData.salario_base_snapshot} onChange={handleChange} />
+                    <input name="salario_base_snapshot" type="number" min="0" step="0.01" value={formData.salario_base_snapshot} onChange={handleChange} placeholder="2500" />
                   </label>
                   <label className="entity-field">
                     <span>Hora extra 50%</span>
-                    <input name="valor_hora_extra_snapshot" type="number" min="0" step="0.01" value={formData.valor_hora_extra_snapshot} onChange={handleChange} />
+                    <input name="valor_hora_extra_snapshot" type="number" min="0" step="0.01" value={formData.valor_hora_extra_snapshot} onChange={handleChange} placeholder="25" />
                   </label>
                   <label className="entity-field">
                     <span>Vale alimentacao</span>
-                    <input name="vale_alimentacao_snapshot" type="number" min="0" step="0.01" value={formData.vale_alimentacao_snapshot} onChange={handleChange} />
+                    <input name="vale_alimentacao_snapshot" type="number" min="0" step="0.01" value={formData.vale_alimentacao_snapshot} onChange={handleChange} placeholder="600" />
                   </label>
                   <label className="entity-field">
                     <span>Descontos fixos</span>
-                    <input name="outros_descontos_snapshot" type="number" min="0" step="0.01" value={formData.outros_descontos_snapshot} onChange={handleChange} />
+                    <input name="outros_descontos_snapshot" type="number" min="0" step="0.01" value={formData.outros_descontos_snapshot} onChange={handleChange} placeholder="0" />
                   </label>
                 </div>
               </article>
@@ -365,31 +366,31 @@ export function FolhaPagamentoPage() {
                 <div className="entity-form__grid entity-form__grid--4">
                   <label className="entity-field">
                     <span>Dias de falta</span>
-                    <input name="dias_faltas" type="number" min="0" value={formData.dias_faltas} onChange={handleChange} />
+                    <input name="dias_faltas" type="number" min="0" value={formData.dias_faltas} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Dias de atestado</span>
-                    <input name="dias_atestado" type="number" min="0" value={formData.dias_atestado} onChange={handleChange} />
+                    <input name="dias_atestado" type="number" min="0" value={formData.dias_atestado} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Dias de ferias</span>
-                    <input name="dias_ferias" type="number" min="0" value={formData.dias_ferias} onChange={handleChange} />
+                    <input name="dias_ferias" type="number" min="0" value={formData.dias_ferias} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Dias de afastamento</span>
-                    <input name="dias_afastamento" type="number" min="0" value={formData.dias_afastamento} onChange={handleChange} />
+                    <input name="dias_afastamento" type="number" min="0" value={formData.dias_afastamento} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Horas extras 50%</span>
-                    <input name="horas_extras_50" type="number" min="0" step="0.01" value={formData.horas_extras_50} onChange={handleChange} />
+                    <input name="horas_extras_50" type="number" min="0" step="0.01" value={formData.horas_extras_50} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Horas extras 100%</span>
-                    <input name="horas_extras_100" type="number" min="0" step="0.01" value={formData.horas_extras_100} onChange={handleChange} />
+                    <input name="horas_extras_100" type="number" min="0" step="0.01" value={formData.horas_extras_100} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Horas adicional noturno</span>
-                    <input name="horas_adicional_noturno" type="number" min="0" step="0.01" value={formData.horas_adicional_noturno} onChange={handleChange} />
+                    <input name="horas_adicional_noturno" type="number" min="0" step="0.01" value={formData.horas_adicional_noturno} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Status da folha</span>
@@ -414,35 +415,35 @@ export function FolhaPagamentoPage() {
                 <div className="entity-form__grid entity-form__grid--4">
                   <label className="entity-field">
                     <span>Bonus</span>
-                    <input name="bonus" type="number" min="0" step="0.01" value={formData.bonus} onChange={handleChange} />
+                    <input name="bonus" type="number" min="0" step="0.01" value={formData.bonus} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Comissoes</span>
-                    <input name="comissoes" type="number" min="0" step="0.01" value={formData.comissoes} onChange={handleChange} />
+                    <input name="comissoes" type="number" min="0" step="0.01" value={formData.comissoes} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Outros proventos</span>
-                    <input name="outros_proventos" type="number" min="0" step="0.01" value={formData.outros_proventos} onChange={handleChange} />
+                    <input name="outros_proventos" type="number" min="0" step="0.01" value={formData.outros_proventos} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Adiantamentos</span>
-                    <input name="adiantamentos" type="number" min="0" step="0.01" value={formData.adiantamentos} onChange={handleChange} />
+                    <input name="adiantamentos" type="number" min="0" step="0.01" value={formData.adiantamentos} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Desconto INSS</span>
-                    <input name="desconto_inss" type="number" min="0" step="0.01" value={formData.desconto_inss} onChange={handleChange} />
+                    <input name="desconto_inss" type="number" min="0" step="0.01" value={formData.desconto_inss} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Desconto IRRF</span>
-                    <input name="desconto_irrf" type="number" min="0" step="0.01" value={formData.desconto_irrf} onChange={handleChange} />
+                    <input name="desconto_irrf" type="number" min="0" step="0.01" value={formData.desconto_irrf} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Vale transporte</span>
-                    <input name="desconto_vale_transporte" type="number" min="0" step="0.01" value={formData.desconto_vale_transporte} onChange={handleChange} />
+                    <input name="desconto_vale_transporte" type="number" min="0" step="0.01" value={formData.desconto_vale_transporte} onChange={handleChange} placeholder="0" />
                   </label>
                   <label className="entity-field">
                     <span>Descontos manuais</span>
-                    <input name="descontos_manuais" type="number" min="0" step="0.01" value={formData.descontos_manuais} onChange={handleChange} />
+                    <input name="descontos_manuais" type="number" min="0" step="0.01" value={formData.descontos_manuais} onChange={handleChange} placeholder="0" />
                   </label>
                 </div>
               </article>
@@ -470,7 +471,7 @@ export function FolhaPagamentoPage() {
 
               <label className="entity-field">
                 <span>Observacoes da folha</span>
-                <textarea name="observacoes" rows={6} value={formData.observacoes} onChange={handleChange} />
+                <textarea name="observacoes" rows={6} value={formData.observacoes} onChange={handleChange} placeholder="Observacoes da competencia, ajustes e justificativas" />
               </label>
 
               <div className="entity-form__actions">

@@ -4,6 +4,7 @@ import './AdminLoginPage.css'
 import { AdminLoginForm } from '../components/auth/AdminLoginForm'
 import { LoginBrandPanel } from '../components/auth/LoginBrandPanel'
 import { AuthLayout } from '../layouts/AuthLayout'
+import { getHttpErrorMessage } from '../services/httpError'
 import { authService } from '../services/authService'
 
 export function AdminLoginPage() {
@@ -22,8 +23,7 @@ export function AdminLoginPage() {
 
       setErrorMessage('Login retornou sucesso, mas sem token de acesso valido.')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Nao foi possivel realizar o login.'
-      setErrorMessage(message)
+      setErrorMessage(getHttpErrorMessage(error, 'Nao foi possivel realizar o login.'))
     }
   }
 

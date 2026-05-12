@@ -1,7 +1,7 @@
-import axios from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clienteService, type Cliente } from '../services/clienteService'
+import { getHttpErrorMessage } from '../services/httpError'
 import { motoristaService, type MotoristaListItem } from '../services/motoristaService'
 import { tipoCargaService, type TipoCarga } from '../services/tipoCargaService'
 import { veiculoService, type VeiculoListItem } from '../services/veiculoService'
@@ -163,18 +163,7 @@ export function ViagemFormPage() {
       setVeiculos(veiculosResponse.data)
       setTiposCarga(tiposCargaResponse.data)
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          typeof error.response?.data?.error === 'string'
-            ? error.response.data.error
-            : typeof error.response?.data?.message === 'string'
-              ? error.response.data.message
-              : 'Nao foi possivel carregar as opcoes do formulario.'
-
-        setFeedback(apiMessage)
-      } else {
-        setFeedback('Nao foi possivel carregar as opcoes do formulario.')
-      }
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar as opcoes do formulario.'))
     } finally {
       setIsLoadingOptions(false)
     }
@@ -257,18 +246,7 @@ export function ViagemFormPage() {
       const response = await viagemService.create(formData)
       navigate(`/dashboard/viagens/${response.data.id}/editar`, { replace: true })
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          typeof error.response?.data?.error === 'string'
-            ? error.response.data.error
-            : typeof error.response?.data?.message === 'string'
-              ? error.response.data.message
-              : 'Nao foi possivel cadastrar a viagem.'
-
-        setFeedback(apiMessage)
-      } else {
-        setFeedback('Nao foi possivel cadastrar a viagem. Revise os dados e tente novamente.')
-      }
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel cadastrar a viagem. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -387,7 +365,7 @@ export function ViagemFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Origem - cidade</span>
-              <input name="origem_cidade" value={formData.origem_cidade} onChange={handleChange} required />
+              <input name="origem_cidade" value={formData.origem_cidade} onChange={handleChange} placeholder="Sao Paulo" required />
             </label>
             <label className="entity-field">
               <span>Origem - UF</span>
@@ -402,7 +380,7 @@ export function ViagemFormPage() {
             </label>
             <label className="entity-field">
               <span>Destino - cidade</span>
-              <input name="destino_cidade" value={formData.destino_cidade} onChange={handleChange} required />
+              <input name="destino_cidade" value={formData.destino_cidade} onChange={handleChange} placeholder="Campinas" required />
             </label>
             <label className="entity-field">
               <span>Destino - UF</span>
@@ -469,11 +447,11 @@ export function ViagemFormPage() {
             </label>
             <label className="entity-field">
               <span>Distancia (km)</span>
-              <input name="distancia_km" type="number" min="0" step="0.01" value={formData.distancia_km} onChange={handleChange} />
+              <input name="distancia_km" type="number" min="0" step="0.01" value={formData.distancia_km} onChange={handleChange} placeholder="450" />
             </label>
             <label className="entity-field">
               <span>KM inicial</span>
-              <input name="km_inicial" type="number" min="0" step="0.01" value={formData.km_inicial} onChange={handleChange} required />
+              <input name="km_inicial" type="number" min="0" step="0.01" value={formData.km_inicial} onChange={handleChange} placeholder="125000" required />
             </label>
             <label className="entity-field">
               <span>Status</span>
@@ -499,15 +477,15 @@ export function ViagemFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Peso da carga (kg)</span>
-              <input name="peso_carga_kg" type="number" min="0" step="0.01" value={formData.peso_carga_kg} onChange={handleChange} />
+              <input name="peso_carga_kg" type="number" min="0" step="0.01" value={formData.peso_carga_kg} onChange={handleChange} placeholder="18000" />
             </label>
             <label className="entity-field">
               <span>Valor do frete</span>
-              <input name="valor_frete" type="number" min="0" step="0.01" value={formData.valor_frete} onChange={handleChange} />
+              <input name="valor_frete" type="number" min="0" step="0.01" value={formData.valor_frete} onChange={handleChange} placeholder="8500" />
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Observacoes internas</span>
-              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={5} />
+              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={5} placeholder="Informacoes adicionais da operacao, rota ou carga" />
             </label>
           </div>
         </article>

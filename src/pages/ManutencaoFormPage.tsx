@@ -1,6 +1,6 @@
-import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getHttpErrorMessage } from '../services/httpError'
 import {
   manutencaoService,
   type ManutencaoFormData,
@@ -107,8 +107,8 @@ export function ManutencaoFormPage() {
         setIsLoading(true)
         const response = await manutencaoService.getById(manutencaoId)
         setFormData({ ...initialFormState, ...response.data })
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados da manutencao.')
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados da manutencao.'))
       } finally {
         setIsLoading(false)
       }
@@ -157,16 +157,7 @@ export function ManutencaoFormPage() {
 
       navigate('/dashboard/manutencoes/listar', { replace: true })
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          typeof error.response?.data?.message === 'string'
-            ? error.response.data.message
-            : 'Nao foi possivel salvar a manutencao.'
-
-        setFeedback(apiMessage)
-      } else {
-        setFeedback('Nao foi possivel salvar a manutencao. Revise os dados e tente novamente.')
-      }
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar a manutencao. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -242,7 +233,7 @@ export function ManutencaoFormPage() {
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Descricao</span>
-              <input name="descricao" value={formData.descricao} onChange={handleChange} required />
+              <input name="descricao" value={formData.descricao} onChange={handleChange} placeholder="Troca de oleo, filtros e revisao geral" required />
             </label>
           </div>
         </article>
@@ -258,20 +249,23 @@ export function ManutencaoFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>KM atual da manutencao</span>
-              <input name="km_na_manutencao" type="number" value={formData.km_na_manutencao} onChange={handleChange} />
+              <input name="km_na_manutencao" type="number" min="0" step="0.01" value={formData.km_na_manutencao} onChange={handleChange} placeholder="125000" />
             </label>
             <label className="entity-field">
               <span>KM da proxima manutencao</span>
               <input
                 name="km_proxima_manutencao"
                 type="number"
+                min="0"
+                step="0.01"
                 value={formData.km_proxima_manutencao}
                 onChange={handleChange}
+                placeholder="135000"
               />
             </label>
             <label className="entity-field">
               <span>Custo</span>
-              <input name="custo" type="number" step="0.01" value={formData.custo} onChange={handleChange} />
+              <input name="custo" type="number" min="0" step="0.01" value={formData.custo} onChange={handleChange} placeholder="1500" />
             </label>
             <label className="entity-field">
               <span>Data agendada</span>
@@ -310,7 +304,7 @@ export function ManutencaoFormPage() {
 
           <label className="entity-field">
             <span>Observacoes internas</span>
-            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} placeholder="Pecas usadas, prazo combinado e observacoes da oficina" />
           </label>
         </article>
 

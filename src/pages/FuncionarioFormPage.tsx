@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getHttpErrorMessage } from '../services/httpError'
 import {
   funcionarioService,
   type FuncionarioFormData,
@@ -125,6 +126,24 @@ function formatMoneyInput(value: string) {
   return parsed
 }
 
+function formatCpfInput(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+function formatPhoneInput(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+
+  if (digits.length <= 2) return digits
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+}
+
 export function FuncionarioFormPage() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -169,10 +188,12 @@ export function FuncionarioFormPage() {
         setFormData({
           ...initialFormState,
           ...response.data,
+          cpf: formatCpfInput(response.data.cpf),
+          telefone: formatPhoneInput(response.data.telefone),
         })
         setCurrentPhotoUrl(response.data.foto_url ?? '')
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados do funcionario.')
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados do funcionario.'))
       } finally {
         setIsLoading(false)
       }
@@ -189,6 +210,16 @@ export function FuncionarioFormPage() {
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
+
+    if (name === 'cpf') {
+      setFormData((current) => ({ ...current, cpf: formatCpfInput(value) }))
+      return
+    }
+
+    if (name === 'telefone') {
+      setFormData((current) => ({ ...current, telefone: formatPhoneInput(value) }))
+      return
+    }
 
     if (name === 'cep') {
       const normalizedCep = value.replace(/\D/g, '').slice(0, 8)
@@ -290,6 +321,34 @@ export function FuncionarioFormPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    const cpfDigits = formData.cpf.replace(/\D/g, '')
+    const telefoneDigits = formData.telefone.replace(/\D/g, '')
+
+    if (cpfDigits.length !== 11) {
+      setFeedback('Informe um CPF valido com 11 digitos.')
+      return
+    }
+
+    if (dataNascimentoInput && !formData.data_nascimento) {
+      setFeedback('Informe a data de nascimento no formato dd/mm/aaaa.')
+      return
+    }
+
+    if (!formData.data_admissao) {
+      setFeedback('Informe a data de admissao no formato dd/mm/aaaa.')
+      return
+    }
+
+    if (dataDemissaoInput && !formData.data_demissao) {
+      setFeedback('Informe a data de demissao no formato dd/mm/aaaa.')
+      return
+    }
+
+    if (formData.telefone.trim() && telefoneDigits.length < 10) {
+      setFeedback('Informe um telefone valido com DDD.')
+      return
+    }
+
     try {
       setIsSaving(true)
       setFeedback('')
@@ -303,8 +362,8 @@ export function FuncionarioFormPage() {
       }
 
       navigate('/dashboard/funcionarios/listar', { replace: true })
-    } catch {
-      setFeedback('Nao foi possivel salvar o funcionario. Revise os dados e tente novamente.')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar o funcionario. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -350,15 +409,15 @@ export function FuncionarioFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field entity-field--span-2">
               <span>Nome completo</span>
-              <input name="nome" value={formData.nome} onChange={handleChange} required />
+              <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Nome completo do funcionario" required />
             </label>
             <label className="entity-field">
               <span>CPF</span>
-              <input name="cpf" value={formData.cpf} onChange={handleChange} required />
+              <input name="cpf" value={formData.cpf} onChange={handleChange} inputMode="numeric" placeholder="000.000.000-00" maxLength={14} required />
             </label>
             <label className="entity-field">
               <span>RG</span>
-              <input name="rg" value={formData.rg} onChange={handleChange} />
+              <input name="rg" value={formData.rg} onChange={handleChange} placeholder="12.345.678-9" />
             </label>
             <label className="entity-field">
               <span>Data de nascimento</span>
@@ -373,11 +432,11 @@ export function FuncionarioFormPage() {
             </label>
             <label className="entity-field">
               <span>Telefone</span>
-              <input name="telefone" value={formData.telefone} onChange={handleChange} />
+              <input name="telefone" type="tel" value={formData.telefone} onChange={handleChange} inputMode="tel" placeholder="(00) 00000-0000" maxLength={15} />
             </label>
             <label className="entity-field entity-field--span-2">
               <span>E-mail</span>
-              <input name="email" type="email" value={formData.email} onChange={handleChange} />
+              <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="funcionario@empresa.com" />
             </label>
           </div>
         </article>
@@ -393,28 +452,28 @@ export function FuncionarioFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>CEP</span>
-              <input name="cep" value={formData.cep} onChange={handleChange} onBlur={() => void handleCepBlur()} placeholder="00000-000" />
+              <input name="cep" value={formData.cep} onChange={handleChange} onBlur={() => void handleCepBlur()} inputMode="numeric" placeholder="00000-000" maxLength={9} />
               <small>{isFetchingCep ? 'Buscando endereco pelo CEP...' : 'Ao sair do campo, o endereco sera preenchido automaticamente.'}</small>
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Endereco</span>
-              <input name="endereco" value={formData.endereco} onChange={handleChange} />
+              <input name="endereco" value={formData.endereco} onChange={handleChange} placeholder="Rua, avenida ou estrada" />
             </label>
             <label className="entity-field">
               <span>Numero</span>
-              <input name="numero" value={formData.numero} onChange={handleChange} />
+              <input name="numero" value={formData.numero} onChange={handleChange} placeholder="123" />
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Complemento</span>
-              <input name="complemento" value={formData.complemento} onChange={handleChange} />
+              <input name="complemento" value={formData.complemento} onChange={handleChange} placeholder="Casa, apto, bloco" />
             </label>
             <label className="entity-field">
               <span>Bairro</span>
-              <input name="bairro" value={formData.bairro} onChange={handleChange} />
+              <input name="bairro" value={formData.bairro} onChange={handleChange} placeholder="Centro" />
             </label>
             <label className="entity-field">
               <span>Cidade</span>
-              <input name="cidade" value={formData.cidade} onChange={handleChange} />
+              <input name="cidade" value={formData.cidade} onChange={handleChange} placeholder="Sao Paulo" />
             </label>
             <label className="entity-field">
               <span>Estado</span>
@@ -441,11 +500,11 @@ export function FuncionarioFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Cargo</span>
-              <input name="cargo" value={formData.cargo} onChange={handleChange} required />
+              <input name="cargo" value={formData.cargo} onChange={handleChange} placeholder="Assistente administrativo" required />
             </label>
             <label className="entity-field">
               <span>Setor</span>
-              <input name="setor" value={formData.setor} onChange={handleChange} required />
+              <input name="setor" value={formData.setor} onChange={handleChange} placeholder="Financeiro" required />
             </label>
             <label className="entity-field">
               <span>Tipo de contrato</span>
@@ -504,7 +563,7 @@ export function FuncionarioFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Salario base</span>
-              <input name="salario_base" type="number" min="0" step="0.01" value={formData.salario_base} onChange={handleChange} />
+              <input name="salario_base" type="number" min="0" step="0.01" value={formData.salario_base} onChange={handleChange} placeholder="2500" />
             </label>
             <label className="entity-field">
               <span>Tipo de pagamento</span>
@@ -518,19 +577,19 @@ export function FuncionarioFormPage() {
             </label>
             <label className="entity-field">
               <span>Valor da hora extra</span>
-              <input name="valor_hora_extra" type="number" min="0" step="0.01" value={formData.valor_hora_extra} onChange={handleChange} />
+              <input name="valor_hora_extra" type="number" min="0" step="0.01" value={formData.valor_hora_extra} onChange={handleChange} placeholder="25" />
             </label>
             <label className="entity-field">
               <span>Adicional noturno</span>
-              <input name="adicional_noturno" type="number" min="0" step="0.01" value={formData.adicional_noturno} onChange={handleChange} />
+              <input name="adicional_noturno" type="number" min="0" step="0.01" value={formData.adicional_noturno} onChange={handleChange} placeholder="150" />
             </label>
             <label className="entity-field">
               <span>Vale alimentacao</span>
-              <input name="vale_alimentacao" type="number" min="0" step="0.01" value={formData.vale_alimentacao} onChange={handleChange} />
+              <input name="vale_alimentacao" type="number" min="0" step="0.01" value={formData.vale_alimentacao} onChange={handleChange} placeholder="600" />
             </label>
             <label className="entity-field">
               <span>Outros descontos</span>
-              <input name="outros_descontos" type="number" min="0" step="0.01" value={formData.outros_descontos} onChange={handleChange} />
+              <input name="outros_descontos" type="number" min="0" step="0.01" value={formData.outros_descontos} onChange={handleChange} placeholder="0" />
             </label>
           </div>
         </article>
@@ -546,15 +605,15 @@ export function FuncionarioFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Banco</span>
-              <input name="banco" value={formData.banco} onChange={handleChange} />
+              <input name="banco" value={formData.banco} onChange={handleChange} placeholder="Banco do Brasil" />
             </label>
             <label className="entity-field">
               <span>Agencia</span>
-              <input name="agencia" value={formData.agencia} onChange={handleChange} />
+              <input name="agencia" value={formData.agencia} onChange={handleChange} placeholder="1234" />
             </label>
             <label className="entity-field">
               <span>Conta</span>
-              <input name="conta" value={formData.conta} onChange={handleChange} />
+              <input name="conta" value={formData.conta} onChange={handleChange} placeholder="12345-6" />
             </label>
             <label className="entity-field">
               <span>Tipo da conta</span>
@@ -568,7 +627,7 @@ export function FuncionarioFormPage() {
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Chave PIX</span>
-              <input name="chave_pix" value={formData.chave_pix} onChange={handleChange} />
+              <input name="chave_pix" value={formData.chave_pix} onChange={handleChange} placeholder="cpf, telefone, e-mail ou chave aleatoria" />
             </label>
           </div>
         </article>
@@ -596,15 +655,15 @@ export function FuncionarioFormPage() {
             </label>
             <label className="entity-field">
               <span>Horas extras</span>
-              <input name="horas_extras" type="number" min="0" step="0.01" value={formData.horas_extras} onChange={handleChange} />
+              <input name="horas_extras" type="number" min="0" step="0.01" value={formData.horas_extras} onChange={handleChange} placeholder="10" />
             </label>
             <label className="entity-field">
               <span>Faltas</span>
-              <input name="faltas" type="number" min="0" step="1" value={formData.faltas} onChange={handleChange} />
+              <input name="faltas" type="number" min="0" step="1" value={formData.faltas} onChange={handleChange} placeholder="0" />
             </label>
             <label className="entity-field">
               <span>Atestados</span>
-              <input name="atestados" type="number" min="0" step="1" value={formData.atestados} onChange={handleChange} />
+              <input name="atestados" type="number" min="0" step="1" value={formData.atestados} onChange={handleChange} placeholder="0" />
             </label>
           </div>
         </article>
@@ -630,7 +689,7 @@ export function FuncionarioFormPage() {
 
             <label className="entity-field">
               <span>Observacoes gerais</span>
-              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} placeholder="Informacoes adicionais para RH, financeiro ou operacao" />
             </label>
           </div>
         </article>
