@@ -61,6 +61,7 @@ function App() {
           <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
+          <Route path="notificacoes" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />
