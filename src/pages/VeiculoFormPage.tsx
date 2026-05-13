@@ -1,6 +1,7 @@
-import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getHttpErrorMessage } from '../services/httpError'
+import { formatPlateInput, formatRenavamInput } from '../services/inputFormatters'
 import {
   veiculoService,
   type VeiculoFormData,
@@ -92,9 +93,14 @@ export function VeiculoFormPage() {
       try {
         setIsLoading(true)
         const response = await veiculoService.getById(veiculoId)
-        setFormData({ ...initialFormState, ...response.data })
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados do veiculo.')
+        setFormData({
+          ...initialFormState,
+          ...response.data,
+          placa: formatPlateInput(response.data.placa),
+          renavam: formatRenavamInput(response.data.renavam),
+        })
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados do veiculo.'))
       } finally {
         setIsLoading(false)
       }
@@ -111,6 +117,17 @@ export function VeiculoFormPage() {
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
+
+    if (name === 'placa') {
+      setFormData((current) => ({ ...current, placa: formatPlateInput(value) }))
+      return
+    }
+
+    if (name === 'renavam') {
+      setFormData((current) => ({ ...current, renavam: formatRenavamInput(value) }))
+      return
+    }
+
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
@@ -149,16 +166,7 @@ export function VeiculoFormPage() {
 
       navigate('/dashboard/veiculos/listar', { replace: true })
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          typeof error.response?.data?.message === 'string'
-            ? error.response.data.message
-            : 'Nao foi possivel salvar o veiculo.'
-
-        setFeedback(apiMessage)
-      } else {
-        setFeedback('Nao foi possivel salvar o veiculo. Revise os dados e tente novamente.')
-      }
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar o veiculo. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -199,19 +207,19 @@ export function VeiculoFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Placa</span>
-              <input name="placa" value={formData.placa} onChange={handleChange} maxLength={10} required />
+              <input name="placa" value={formData.placa} onChange={handleChange} placeholder="ABC-1D23" maxLength={8} required />
             </label>
             <label className="entity-field">
               <span>Modelo</span>
-              <input name="modelo" value={formData.modelo} onChange={handleChange} required />
+              <input name="modelo" value={formData.modelo} onChange={handleChange} placeholder="FH 540" required />
             </label>
             <label className="entity-field">
               <span>Marca</span>
-              <input name="marca" value={formData.marca} onChange={handleChange} required />
+              <input name="marca" value={formData.marca} onChange={handleChange} placeholder="Volvo" required />
             </label>
             <label className="entity-field">
               <span>Ano</span>
-              <input name="ano" type="number" value={formData.ano} onChange={handleChange} required />
+              <input name="ano" type="number" value={formData.ano} onChange={handleChange} min="1950" max="2100" step="1" placeholder="2024" required />
             </label>
             <label className="entity-field">
               <span>Tipo</span>
@@ -238,13 +246,16 @@ export function VeiculoFormPage() {
               <input
                 name="capacidade_carga_kg"
                 type="number"
+                min="0"
+                step="0.01"
                 value={formData.capacidade_carga_kg}
                 onChange={handleChange}
+                placeholder="25000"
               />
             </label>
             <label className="entity-field">
               <span>KM atual</span>
-              <input name="km_atual" type="number" value={formData.km_atual} onChange={handleChange} />
+              <input name="km_atual" type="number" min="0" step="0.01" value={formData.km_atual} onChange={handleChange} placeholder="120000" />
             </label>
           </div>
         </article>
@@ -260,15 +271,15 @@ export function VeiculoFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>RENAVAM</span>
-              <input name="renavam" value={formData.renavam} onChange={handleChange} maxLength={11} />
+              <input name="renavam" value={formData.renavam} onChange={handleChange} inputMode="numeric" placeholder="00000000000" maxLength={11} />
             </label>
             <label className="entity-field">
               <span>Seguradora</span>
-              <input name="seguradora" value={formData.seguradora} onChange={handleChange} />
+              <input name="seguradora" value={formData.seguradora} onChange={handleChange} placeholder="Porto Seguro" />
             </label>
             <label className="entity-field">
               <span>Numero da apolice</span>
-              <input name="numero_apolice" value={formData.numero_apolice} onChange={handleChange} />
+              <input name="numero_apolice" value={formData.numero_apolice} onChange={handleChange} placeholder="123456789" />
             </label>
             <label className="entity-field">
               <span>Vencimento do seguro</span>
@@ -319,7 +330,7 @@ export function VeiculoFormPage() {
 
           <label className="entity-field">
             <span>Observacoes internas</span>
-            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} placeholder="Observacoes sobre uso, historico ou cuidados do veiculo" />
           </label>
         </article>
 

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { api } from './api'
+import { getHttpErrorMessage } from './httpError'
 import { sessionService, type AuthUser } from './sessionService'
 
 type AdminLoginPayload = {
@@ -42,13 +43,13 @@ function getLoginErrorMessage(error: unknown) {
     if (error.response?.status === 404) {
       return 'A rota de login nao foi encontrada no backend. Confira se o endpoint correto e /auth/login.'
     }
-1
+
     if (error.code === 'ERR_NETWORK') {
       return 'Nao foi possivel conectar ao backend em localhost:8081.'
     }
   }
 
-  return 'Nao foi possivel realizar o login agora.'
+  return getHttpErrorMessage(error, 'Nao foi possivel realizar o login agora.')
 }
 
 export const authService = {

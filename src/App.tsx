@@ -38,6 +38,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />}>
           <Route index element={<DashboardHome />} />
           <Route path="viagens/listar" element={<ViagensListPage />} />
+          <Route path="viagens/finalizadas" element={<ViagensListPage mode="historico-finalizadas" />} />
           <Route path="viagens/nova" element={<ViagemFormPage />} />
           <Route path="viagens/:id/editar" element={<ViagemDetailPage />} />
           <Route path="veiculos/listar" element={<VeiculosListPage />} />
@@ -62,6 +63,7 @@ function App() {
           <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
           <Route path="abastecimentos" element={<SectionPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
+          <Route path="notificacoes" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />

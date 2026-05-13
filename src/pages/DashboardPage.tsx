@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType, type SVGProps } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AlertIcon,
+  BellIcon,
   ChevronDownIcon,
   FuelIcon,
   GridIcon,
@@ -18,13 +19,17 @@ import {
   WrenchIcon,
 } from '../components/dashboard/DashboardIcons'
 import { authService } from '../services/authService'
+import { notificacaoService } from '../services/notificacaoService'
 import { sessionService } from '../services/sessionService'
 import './DashboardPage.css'
+
+type DashboardBadgeKey = 'notifications'
 
 type DashboardNavItem = {
   label: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
   to?: string
+  badgeKey?: DashboardBadgeKey
   children?: Array<{
     label: string
     icon: ComponentType<SVGProps<SVGSVGElement>>
@@ -39,6 +44,7 @@ const navigationItems: DashboardNavItem[] = [
     icon: RouteIcon,
     children: [
       { label: 'Listar viagens', icon: ListIcon, to: '/dashboard/viagens/listar' },
+      { label: 'Historico finalizadas', icon: ListIcon, to: '/dashboard/viagens/finalizadas' },
       { label: 'Nova viagem', icon: PlusIcon, to: '/dashboard/viagens/nova' },
     ],
   },
@@ -78,6 +84,7 @@ const navigationItems: DashboardNavItem[] = [
   },
   { label: 'Abastecimentos', icon: FuelIcon, to: '/dashboard/abastecimentos' },
   { label: 'Ocorrencias', icon: AlertIcon, to: '/dashboard/ocorrencias' },
+  { label: 'Notificacoes', icon: BellIcon, to: '/dashboard/notificacoes', badgeKey: 'notifications' },
   { label: 'Folha de pagamento', icon: PayrollIcon, to: '/dashboard/folha-pagamento' },
   { label: 'Historico de alteracoes', icon: ListIcon, to: '/dashboard/historico-alteracoes' },
   { label: 'Relatorios', icon: ReportIcon, to: '/dashboard/relatorios' },
@@ -103,6 +110,17 @@ export function DashboardPage() {
   const session = sessionService.getSession()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState(() => getExpandedGroups(location.pathname))
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
+  const notificationBadgeLabel = unreadNotifications > 99 ? '99+' : String(unreadNotifications)
+
+  function renderSidebarBadge(badgeKey?: DashboardBadgeKey) {
+    if (badgeKey !== 'notifications' || unreadNotifications <= 0) {
+      return null
+    }
+
+    return <span className="dashboard-sidebar__badge">{notificationBadgeLabel}</span>
+  }
 
   useEffect(() => {
     setExpandedGroups((current) => ({
@@ -110,6 +128,53 @@ export function DashboardPage() {
       ...getExpandedGroups(location.pathname),
     }))
   }, [location.pathname])
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadUnreadNotifications() {
+      try {
+        const count = await notificacaoService.countUnread()
+
+        if (isActive) {
+          setUnreadNotifications(count)
+        }
+      } catch {
+        if (isActive) {
+          setUnreadNotifications(0)
+        }
+      }
+    }
+
+    void loadUnreadNotifications()
+
+    return () => {
+      isActive = false
+    }
+  }, [location.pathname])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    void notificacaoService
+      .subscribeAdmin({
+        signal: controller.signal,
+        onNotification(notification) {
+          if (!notification.lida) {
+            setUnreadNotifications((current) => current + 1)
+          }
+        },
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          void notificacaoService.countUnread().then(setUnreadNotifications).catch(() => setUnreadNotifications(0))
+        }
+      })
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
 
   function handleToggleGroup(label: keyof ReturnType<typeof getExpandedGroups>) {
     setExpandedGroups((current) => ({
@@ -155,6 +220,7 @@ export function DashboardPage() {
                 >
                   <Icon width={18} height={18} />
                   <span>{item.label}</span>
+                  {renderSidebarBadge(item.badgeKey)}
                 </NavLink>
               )
             }
@@ -227,8 +293,25 @@ export function DashboardPage() {
             <span>{session?.user.email ?? 'painel@transgestao.local'}</span>
           </div>
 
-          <div className="dashboard-topbar__badge">
-            <span>{session?.user.actor_type ?? 'admin'}</span>
+          <div className="dashboard-topbar__actions">
+            <NavLink
+              className="dashboard-topbar__notifications"
+              to="/dashboard/notificacoes"
+              aria-label={
+                unreadNotifications > 0
+                  ? `${unreadNotifications} notificacoes nao lidas`
+                  : 'Nenhuma notificacao nao lida'
+              }
+            >
+              <BellIcon width={20} height={20} />
+              {unreadNotifications > 0 ? (
+                <span className="dashboard-notification-badge">{notificationBadgeLabel}</span>
+              ) : null}
+            </NavLink>
+
+            <div className="dashboard-topbar__badge">
+              <span>{session?.user.actor_type ?? 'admin'}</span>
+            </div>
           </div>
         </header>
 

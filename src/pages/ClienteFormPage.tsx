@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { clienteService, type ClienteFormData } from '../services/clienteService'
+import { getHttpErrorMessage } from '../services/httpError'
+import { formatCpfCnpjInput, formatPhoneInput } from '../services/inputFormatters'
 
 const initialFormState: ClienteFormData = {
   nome: '',
@@ -31,9 +33,13 @@ export function ClienteFormPage() {
       try {
         setIsLoading(true)
         const response = await clienteService.getById(clienteId)
-        setFormData(response.data)
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados do cliente.')
+        setFormData({
+          ...response.data,
+          cpf_cnpj: formatCpfCnpjInput(response.data.cpf_cnpj),
+          telefone: formatPhoneInput(response.data.telefone),
+        })
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados do cliente.'))
       } finally {
         setIsLoading(false)
       }
@@ -44,6 +50,17 @@ export function ClienteFormPage() {
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target
+
+    if (name === 'cpf_cnpj') {
+      setFormData((current) => ({ ...current, cpf_cnpj: formatCpfCnpjInput(value) }))
+      return
+    }
+
+    if (name === 'telefone') {
+      setFormData((current) => ({ ...current, telefone: formatPhoneInput(value) }))
+      return
+    }
+
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
@@ -61,8 +78,8 @@ export function ClienteFormPage() {
       }
 
       navigate('/dashboard/clientes/listar', { replace: true })
-    } catch {
-      setFeedback('Nao foi possivel salvar o cliente. Revise os dados e tente novamente.')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar o cliente. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -103,19 +120,19 @@ export function ClienteFormPage() {
           <div className="entity-form__grid entity-form__grid--2">
             <label className="entity-field entity-field--span-2">
               <span>Nome</span>
-              <input name="nome" value={formData.nome} onChange={handleChange} required />
+              <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Razao social ou nome do cliente" required />
             </label>
             <label className="entity-field">
               <span>CPF/CNPJ</span>
-              <input name="cpf_cnpj" value={formData.cpf_cnpj} onChange={handleChange} required />
+              <input name="cpf_cnpj" value={formData.cpf_cnpj} onChange={handleChange} inputMode="numeric" placeholder="000.000.000-00 ou 00.000.000/0000-00" maxLength={18} required />
             </label>
             <label className="entity-field">
               <span>Telefone</span>
-              <input name="telefone" value={formData.telefone} onChange={handleChange} required />
+              <input name="telefone" type="tel" value={formData.telefone} onChange={handleChange} inputMode="tel" placeholder="(00) 00000-0000" maxLength={15} required />
             </label>
             <label className="entity-field entity-field--span-2">
               <span>E-mail</span>
-              <input name="email" type="email" value={formData.email} onChange={handleChange} required />
+              <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="cliente@empresa.com" required />
             </label>
           </div>
         </article>

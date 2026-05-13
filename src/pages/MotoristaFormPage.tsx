@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getHttpErrorMessage } from '../services/httpError'
+import { formatCepInput, formatCnhInput, formatCpfInput, formatPhoneInput } from '../services/inputFormatters'
 import {
   motoristaService,
   type MotoristaFormData,
@@ -164,12 +166,16 @@ export function MotoristaFormPage() {
         setFormData({
           ...initialFormState,
           ...response.data,
+          cpf: formatCpfInput(response.data.cpf),
+          telefone: formatPhoneInput(response.data.telefone),
+          numero_cnh: formatCnhInput(response.data.numero_cnh),
+          endereco_cep: formatCepInput(response.data.endereco_cep),
           senha_inicial: '',
           nova_senha: '',
         })
         setCurrentPhotoUrl(response.data.foto_url ?? '')
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados do motorista.')
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados do motorista.'))
       } finally {
         setIsLoading(false)
       }
@@ -185,13 +191,24 @@ export function MotoristaFormPage() {
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
-    if (name === 'endereco_cep') {
-      const normalizedCep = value.replace(/\D/g, '').slice(0, 8)
-      const formattedCep = normalizedCep.replace(/^(\d{5})(\d{0,3}).*/, (_, prefix, suffix: string) =>
-        suffix ? `${prefix}-${suffix}` : prefix,
-      )
 
-      setFormData((current) => ({ ...current, endereco_cep: formattedCep }))
+    if (name === 'cpf') {
+      setFormData((current) => ({ ...current, cpf: formatCpfInput(value) }))
+      return
+    }
+
+    if (name === 'telefone') {
+      setFormData((current) => ({ ...current, telefone: formatPhoneInput(value) }))
+      return
+    }
+
+    if (name === 'numero_cnh') {
+      setFormData((current) => ({ ...current, numero_cnh: formatCnhInput(value) }))
+      return
+    }
+
+    if (name === 'endereco_cep') {
+      setFormData((current) => ({ ...current, endereco_cep: formatCepInput(value) }))
       return
     }
 
@@ -302,20 +319,7 @@ export function MotoristaFormPage() {
 
       navigate('/dashboard/motoristas/listar', { replace: true })
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage = typeof error.response?.data?.error === 'string'
-          ? error.response.data.error
-          : typeof error.response?.data?.message === 'string'
-            ? error.response.data.message
-            : ''
-
-        if (apiMessage) {
-          setFeedback(apiMessage)
-          return
-        }
-      }
-
-      setFeedback('Nao foi possivel salvar o motorista. Revise os dados e tente novamente.')
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar o motorista. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -356,19 +360,19 @@ export function MotoristaFormPage() {
           <div className="entity-form__grid entity-form__grid--3">
             <label className="entity-field">
               <span>Nome completo</span>
-              <input name="nome" value={formData.nome} onChange={handleChange} required />
+              <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Nome completo do motorista" required />
             </label>
             <label className="entity-field">
               <span>CPF</span>
-              <input name="cpf" value={formData.cpf} onChange={handleChange} required />
+              <input name="cpf" value={formData.cpf} onChange={handleChange} inputMode="numeric" placeholder="000.000.000-00" maxLength={14} required />
             </label>
             <label className="entity-field">
               <span>Telefone</span>
-              <input name="telefone" value={formData.telefone} onChange={handleChange} required />
+              <input name="telefone" type="tel" value={formData.telefone} onChange={handleChange} inputMode="tel" placeholder="(00) 00000-0000" maxLength={15} required />
             </label>
             <label className="entity-field">
               <span>E-mail</span>
-              <input name="email" type="email" value={formData.email} onChange={handleChange} required />
+              <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="motorista@empresa.com" required />
             </label>
             <label className="entity-field">
               <span>Data de admissao</span>
@@ -407,7 +411,7 @@ export function MotoristaFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field">
               <span>Numero da CNH</span>
-              <input name="numero_cnh" value={formData.numero_cnh} onChange={handleChange} required />
+              <input name="numero_cnh" value={formData.numero_cnh} onChange={handleChange} inputMode="numeric" placeholder="00000000000" maxLength={11} required />
             </label>
             <label className="entity-field">
               <span>Categoria CNH</span>
@@ -439,6 +443,7 @@ export function MotoristaFormPage() {
                 type="password"
                 value={isEditing ? formData.nova_senha ?? '' : formData.senha_inicial ?? ''}
                 onChange={handleChange}
+                placeholder={isEditing ? 'Nova senha opcional' : 'Minimo de 6 caracteres'}
                 minLength={isEditing ? undefined : 6}
                 required={!isEditing}
               />
@@ -457,23 +462,23 @@ export function MotoristaFormPage() {
           <div className="entity-form__grid entity-form__grid--4">
             <label className="entity-field entity-field--span-2">
               <span>Logradouro</span>
-              <input name="endereco_logradouro" value={formData.endereco_logradouro} onChange={handleChange} />
+              <input name="endereco_logradouro" value={formData.endereco_logradouro} onChange={handleChange} placeholder="Rua, avenida ou estrada" />
             </label>
             <label className="entity-field">
               <span>Numero</span>
-              <input name="endereco_numero" value={formData.endereco_numero} onChange={handleChange} />
+              <input name="endereco_numero" value={formData.endereco_numero} onChange={handleChange} placeholder="123" />
             </label>
             <label className="entity-field">
               <span>Complemento</span>
-              <input name="endereco_complemento" value={formData.endereco_complemento} onChange={handleChange} />
+              <input name="endereco_complemento" value={formData.endereco_complemento} onChange={handleChange} placeholder="Casa, apto, bloco" />
             </label>
             <label className="entity-field">
               <span>Bairro</span>
-              <input name="endereco_bairro" value={formData.endereco_bairro} onChange={handleChange} />
+              <input name="endereco_bairro" value={formData.endereco_bairro} onChange={handleChange} placeholder="Centro" />
             </label>
             <label className="entity-field">
               <span>Cidade</span>
-              <input name="endereco_cidade" value={formData.endereco_cidade} onChange={handleChange} />
+              <input name="endereco_cidade" value={formData.endereco_cidade} onChange={handleChange} placeholder="Sao Paulo" />
             </label>
             <label className="entity-field">
               <span>UF</span>
@@ -493,7 +498,9 @@ export function MotoristaFormPage() {
                 value={formData.endereco_cep}
                 onChange={handleChange}
                 onBlur={() => void handleCepBlur()}
+                inputMode="numeric"
                 placeholder="00000-000"
+                maxLength={9}
               />
               <small>{isFetchingCep ? 'Buscando endereco pelo CEP...' : 'Ao sair do campo, o endereco sera preenchido automaticamente.'}</small>
             </label>
@@ -524,7 +531,7 @@ export function MotoristaFormPage() {
             </div>
             <label className="entity-field">
               <span>Observacoes</span>
-              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} />
+              <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={8} placeholder="Informacoes adicionais para RH e operacao" />
             </label>
           </div>
         </article>

@@ -1,7 +1,7 @@
-import axios from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { clienteService, type Cliente } from '../services/clienteService'
+import { getHttpErrorMessage } from '../services/httpError'
 import { motoristaService, type MotoristaListItem } from '../services/motoristaService'
 import { tipoCargaService, type TipoCarga } from '../services/tipoCargaService'
 import { veiculoService, type VeiculoListItem } from '../services/veiculoService'
@@ -10,6 +10,7 @@ import {
   type ViagemAbastecimento,
   type ViagemDetalhe,
   type ViagemDocumento,
+  type ViagemFinalizacao,
   type ViagemFormData,
   type ViagemOcorrencia,
   type ViagemStatus,
@@ -72,7 +73,7 @@ const initialFormState: ViagemFormData = {
   observacoes: '',
 }
 
-type ActivePanel = 'timeline' | 'documentos' | 'ocorrencias' | 'abastecimentos'
+type ActivePanel = 'timeline' | 'documentos' | 'finalizacoes' | 'ocorrencias' | 'abastecimentos'
 
 function formatLabel(text?: string) {
   if (!text) {
@@ -165,6 +166,22 @@ function buildApiDateTime(date: string, time: string) {
   return `${year}-${month}-${day}T${hour}:${minute}`
 }
 
+function getNowDateTimeParts() {
+  const now = new Date()
+  const date = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(now)
+  const time = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now)
+
+  return { date, time }
+}
+
 function buildFormState(viagem: ViagemDetalhe): ViagemFormData {
   return {
     cliente_id: String(viagem.cliente_id ?? ''),
@@ -212,6 +229,7 @@ function fallbackTimeline(viagem: ViagemDetalhe | null): ViagemTimelineItem[] {
 export function ViagemDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const nowParts = useMemo(() => getNowDateTimeParts(), [])
   const [viagem, setViagem] = useState<ViagemDetalhe | null>(null)
   const [formData, setFormData] = useState<ViagemFormData>(initialFormState)
   const [dataSaidaDate, setDataSaidaDate] = useState('')
@@ -228,12 +246,20 @@ export function ViagemDetailPage() {
   const [tipoCargaSearch, setTipoCargaSearch] = useState('')
   const [timeline, setTimeline] = useState<ViagemTimelineItem[]>([])
   const [documentos, setDocumentos] = useState<ViagemDocumento[]>([])
+  const [documentFiles, setDocumentFiles] = useState<File[]>([])
+  const [finalizacoes, setFinalizacoes] = useState<ViagemFinalizacao[]>([])
   const [ocorrencias, setOcorrencias] = useState<ViagemOcorrencia[]>([])
   const [abastecimentos, setAbastecimentos] = useState<ViagemAbastecimento[]>([])
   const [activePanel, setActivePanel] = useState<ActivePanel>('timeline')
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingOptions, setIsLoadingOptions] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false)
+  const [isFinalizing, setIsFinalizing] = useState(false)
+  const [finalizacaoKMFinal, setFinalizacaoKMFinal] = useState('')
+  const [finalizacaoDate, setFinalizacaoDate] = useState(nowParts.date)
+  const [finalizacaoTime, setFinalizacaoTime] = useState(nowParts.time)
+  const [finalizacaoObservacao, setFinalizacaoObservacao] = useState('')
   const [feedback, setFeedback] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -259,6 +285,9 @@ export function ViagemDetailPage() {
   const hasSelectedMotoristaOption = motoristas.some((item) => String(item.id) === formData.motorista_id)
   const hasSelectedVeiculoOption = veiculos.some((item) => String(item.id) === formData.veiculo_id)
   const hasSelectedTipoCargaOption = tiposCarga.some((item) => String(item.id) === formData.tipo_carga_id)
+  const editableStatusOptions = viagem?.status === 'concluida'
+    ? statusOptions
+    : statusOptions.filter((option) => option.value !== 'concluida')
 
   const loadOptions = useCallback(async () => {
     try {
@@ -297,12 +326,19 @@ export function ViagemDetailPage() {
       setFormData(buildFormState(response.data))
       setTimeline(response.data.timeline ?? [])
       setDocumentos(response.data.documentos ?? [])
+      setFinalizacoes([])
       setOcorrencias(response.data.ocorrencias ?? [])
       setAbastecimentos(response.data.abastecimentos ?? [])
 
-      const [timelineResponse, documentosResponse, ocorrenciasResponse, abastecimentosResponse] = await Promise.allSettled([
+      const finalizacaoParts = splitApiDateTime(response.data.data_chegada_real)
+      setFinalizacaoKMFinal(response.data.km_final ?? '')
+      setFinalizacaoDate(finalizacaoParts.date || nowParts.date)
+      setFinalizacaoTime(finalizacaoParts.time || nowParts.time)
+
+      const [timelineResponse, documentosResponse, finalizacoesResponse, ocorrenciasResponse, abastecimentosResponse] = await Promise.allSettled([
         viagemService.getTimeline(id),
         viagemService.getDocumentos(id),
+        viagemService.getFinalizacoes(id),
         viagemService.getOcorrencias(id),
         viagemService.getAbastecimentos(id),
       ])
@@ -313,6 +349,10 @@ export function ViagemDetailPage() {
 
       if (documentosResponse.status === 'fulfilled') {
         setDocumentos(documentosResponse.value.data)
+      }
+
+      if (finalizacoesResponse.status === 'fulfilled') {
+        setFinalizacoes(finalizacoesResponse.value.data)
       }
 
       if (ocorrenciasResponse.status === 'fulfilled') {
@@ -327,7 +367,7 @@ export function ViagemDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [id])
+  }, [id, nowParts.date, nowParts.time])
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -392,6 +432,80 @@ export function ViagemDetailPage() {
     }))
   }
 
+  function handleDocumentFilesChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setDocumentFiles(Array.from(event.target.files ?? []))
+  }
+
+  async function handleUploadDocuments() {
+    if (!id || documentFiles.length === 0) {
+      setFeedback('Selecione ao menos um PDF ou XML para anexar.')
+      return
+    }
+
+    try {
+      setIsUploadingDocuments(true)
+      setFeedback('')
+      setSuccessMessage('')
+
+      const response = await viagemService.uploadDocumentos(id, documentFiles)
+      setDocumentos((current) => [...response.data, ...current])
+      setDocumentFiles([])
+      setSuccessMessage('Documento(s) anexado(s) com sucesso.')
+      setActivePanel('documentos')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel anexar os documentos da viagem.'))
+    } finally {
+      setIsUploadingDocuments(false)
+    }
+  }
+
+  async function handleDownloadDocument(item: ViagemDocumento) {
+    if (!id) {
+      return
+    }
+
+    try {
+      setFeedback('')
+      await viagemService.downloadDocumento(id, item.id, item.nome)
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel baixar o documento da viagem.'))
+    }
+  }
+
+  async function handleFinalizeTrip() {
+    if (!id) {
+      return
+    }
+
+    const dataChegadaReal = buildApiDateTime(finalizacaoDate, finalizacaoTime)
+    if (!dataChegadaReal || !finalizacaoKMFinal.trim()) {
+      setFeedback('Informe KM final e data/hora real de chegada para finalizar a viagem.')
+      return
+    }
+
+    try {
+      setIsFinalizing(true)
+      setFeedback('')
+      setSuccessMessage('')
+
+      const response = await viagemService.finalize(id, {
+        km_final: finalizacaoKMFinal.trim(),
+        data_chegada_real: dataChegadaReal,
+        observacao_admin: finalizacaoObservacao.trim(),
+      })
+
+      setViagem(response.data)
+      setFormData(buildFormState(response.data))
+      await loadViagem()
+      setSuccessMessage('Viagem finalizada com sucesso.')
+      setActivePanel('finalizacoes')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel finalizar a viagem.'))
+    } finally {
+      setIsFinalizing(false)
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -408,16 +522,7 @@ export function ViagemDetailPage() {
       setFormData(buildFormState(response.data))
       setSuccessMessage('Viagem atualizada com sucesso.')
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage =
-          typeof error.response?.data?.message === 'string'
-            ? error.response.data.message
-            : 'Nao foi possivel atualizar a viagem.'
-
-        setFeedback(apiMessage)
-      } else {
-        setFeedback('Nao foi possivel atualizar a viagem. Revise os dados e tente novamente.')
-      }
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel atualizar a viagem. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -454,6 +559,11 @@ export function ViagemDetailPage() {
           <button className="dashboard-chip" type="button" onClick={() => void loadViagem()}>
             Atualizar dados
           </button>
+          {viagem.status !== 'concluida' && viagem.status !== 'cancelada' ? (
+            <button className="entity-action entity-action--primary" type="button" onClick={() => setActivePanel('finalizacoes')}>
+              Finalizar viagem
+            </button>
+          ) : null}
           <Link className="entity-action entity-action--secondary" to="/dashboard/viagens/listar">
             Voltar para listagem
           </Link>
@@ -615,7 +725,7 @@ export function ViagemDetailPage() {
             <div className="entity-form__grid entity-form__grid--4">
               <label className="entity-field">
                 <span>Origem - cidade</span>
-                <input name="origem_cidade" value={formData.origem_cidade} onChange={handleChange} required />
+                <input name="origem_cidade" value={formData.origem_cidade} onChange={handleChange} placeholder="Sao Paulo" required />
               </label>
               <label className="entity-field">
                 <span>Origem - UF</span>
@@ -630,7 +740,7 @@ export function ViagemDetailPage() {
               </label>
               <label className="entity-field">
                 <span>Destino - cidade</span>
-                <input name="destino_cidade" value={formData.destino_cidade} onChange={handleChange} required />
+                <input name="destino_cidade" value={formData.destino_cidade} onChange={handleChange} placeholder="Campinas" required />
               </label>
               <label className="entity-field">
                 <span>Destino - UF</span>
@@ -697,16 +807,16 @@ export function ViagemDetailPage() {
               </label>
               <label className="entity-field">
                 <span>Distancia (km)</span>
-                <input name="distancia_km" type="number" min="0" step="0.01" value={formData.distancia_km} onChange={handleChange} />
+                <input name="distancia_km" type="number" min="0" step="0.01" value={formData.distancia_km} onChange={handleChange} placeholder="450" />
               </label>
               <label className="entity-field">
                 <span>KM inicial</span>
-                <input name="km_inicial" type="number" min="0" step="0.01" value={formData.km_inicial} onChange={handleChange} required />
+                <input name="km_inicial" type="number" min="0" step="0.01" value={formData.km_inicial} onChange={handleChange} placeholder="125000" required />
               </label>
               <label className="entity-field">
                 <span>Status</span>
                 <select name="status" value={formData.status} onChange={handleChange}>
-                  {statusOptions.map((option) => (
+                  {editableStatusOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -727,15 +837,15 @@ export function ViagemDetailPage() {
             <div className="entity-form__grid entity-form__grid--4">
               <label className="entity-field">
                 <span>Peso da carga (kg)</span>
-                <input name="peso_carga_kg" type="number" min="0" step="0.01" value={formData.peso_carga_kg} onChange={handleChange} />
+                <input name="peso_carga_kg" type="number" min="0" step="0.01" value={formData.peso_carga_kg} onChange={handleChange} placeholder="18000" />
               </label>
               <label className="entity-field">
                 <span>Valor do frete</span>
-                <input name="valor_frete" type="number" min="0" step="0.01" value={formData.valor_frete} onChange={handleChange} />
+                <input name="valor_frete" type="number" min="0" step="0.01" value={formData.valor_frete} onChange={handleChange} placeholder="8500" />
               </label>
               <label className="entity-field entity-field--span-2">
                 <span>Observacoes internas</span>
-                <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={5} />
+                <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows={5} placeholder="Informacoes adicionais da operacao, rota ou carga" />
               </label>
             </div>
           </article>
@@ -766,6 +876,9 @@ export function ViagemDetailPage() {
               <button className={activePanel === 'documentos' ? 'is-active' : ''} type="button" onClick={() => setActivePanel('documentos')}>
                 Documentos
               </button>
+              <button className={activePanel === 'finalizacoes' ? 'is-active' : ''} type="button" onClick={() => setActivePanel('finalizacoes')}>
+                Finalizacao
+              </button>
               <button className={activePanel === 'ocorrencias' ? 'is-active' : ''} type="button" onClick={() => setActivePanel('ocorrencias')}>
                 Ocorrencias
               </button>
@@ -791,15 +904,97 @@ export function ViagemDetailPage() {
 
             {activePanel === 'documentos' ? (
               <div className="trip-detail-list">
+                <div className="entity-timeline__item">
+                  <strong>Anexar documentos</strong>
+                  <small>Os arquivos enviados aqui sao armazenados na pasta `docs` do R2.</small>
+                  <div className="entity-form__grid">
+                    <label className="entity-field">
+                      <span>PDF ou XML</span>
+                      <input type="file" accept=".pdf,.xml,application/pdf,text/xml,application/xml" multiple onChange={handleDocumentFilesChange} />
+                    </label>
+                    <button className="entity-action entity-action--primary" type="button" onClick={() => void handleUploadDocuments()} disabled={isUploadingDocuments}>
+                      {isUploadingDocuments ? 'Enviando...' : 'Enviar documentos'}
+                    </button>
+                  </div>
+                </div>
+
                 {documentos.length === 0 ? (
                   <p className="entity-empty-inline">Sem documentos vinculados.</p>
                 ) : (
                   documentos.map((item) => (
                     <div className="entity-timeline__item" key={item.id}>
                       <strong>{item.nome ?? item.tipo ?? 'Documento'}</strong>
-                      <span>{formatLabel(item.status)} · {item.numero ?? 'Sem numero'}</span>
-                      <small>Emissao {formatDateTime(item.data_emissao)} · validade {formatDateTime(item.data_validade)}</small>
-                      {item.url ? <a className="trip-detail-link" href={item.url} target="_blank" rel="noreferrer">Abrir documento</a> : null}
+                      <span>{(item.tipo ?? 'arquivo').toUpperCase()} · {formatNumber(item.tamanho_bytes ?? 0, 'bytes')}</span>
+                      <small>Enviado em {formatDateTime(item.created_at)}</small>
+                      <button className="entity-action entity-action--secondary" type="button" onClick={() => void handleDownloadDocument(item)}>
+                        Baixar documento
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : null}
+
+            {activePanel === 'finalizacoes' ? (
+              <div className="trip-detail-list">
+                {viagem.status !== 'concluida' && viagem.status !== 'cancelada' ? (
+                  <div className="entity-timeline__item">
+                    <strong>Finalizar viagem como administrador</strong>
+                    <small>Esse fluxo encerra a viagem, libera o veiculo e registra o fechamento no historico.</small>
+                    <div className="entity-form__grid entity-form__grid--2">
+                      <label className="entity-field">
+                        <span>KM final</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={finalizacaoKMFinal}
+                          onChange={(event) => setFinalizacaoKMFinal(event.target.value)}
+                          placeholder="125450"
+                        />
+                      </label>
+                      <label className="entity-field">
+                        <span>Data real de chegada</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="dd/mm/aaaa"
+                          value={finalizacaoDate}
+                          onChange={(event) => setFinalizacaoDate(formatBrazilianDate(event.target.value))}
+                        />
+                      </label>
+                      <label className="entity-field">
+                        <span>Hora real de chegada</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="18:40"
+                          value={finalizacaoTime}
+                          onChange={(event) => setFinalizacaoTime(formatTimeValue(event.target.value))}
+                        />
+                      </label>
+                      <label className="entity-field">
+                        <span>Observacao administrativa</span>
+                        <textarea value={finalizacaoObservacao} onChange={(event) => setFinalizacaoObservacao(event.target.value)} rows={4} placeholder="Motivo da finalizacao, observacoes e ocorrencias" />
+                      </label>
+                    </div>
+                    <button className="entity-action entity-action--primary" type="button" onClick={() => void handleFinalizeTrip()} disabled={isFinalizing}>
+                      {isFinalizing ? 'Finalizando...' : 'Confirmar finalizacao'}
+                    </button>
+                  </div>
+                ) : null}
+
+                {finalizacoes.length === 0 ? (
+                  <p className="entity-empty-inline">Sem registros de finalizacao para esta viagem.</p>
+                ) : (
+                  finalizacoes.map((item) => (
+                    <div className="entity-timeline__item" key={item.id}>
+                      <strong>KM final {item.km_final}</strong>
+                      <span>{formatLabel(item.status)} · solicitado em {formatDateTime(item.solicitado_em)}</span>
+                      <small>
+                        {item.observacao_admin || item.observacao_motorista || 'Sem observacoes registradas.'}
+                        {item.respondido_em ? ` · respondido em ${formatDateTime(item.respondido_em)}` : ''}
+                      </small>
                     </div>
                   ))
                 )}

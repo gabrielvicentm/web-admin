@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { tipoCargaService, type TipoCargaFormData } from '../services/tipoCargaService'
+import { getHttpErrorMessage } from '../services/httpError'
 
 const initialFormState: TipoCargaFormData = {
   nome: '',
@@ -30,8 +31,8 @@ export function TipoCargaFormPage() {
         setIsLoading(true)
         const response = await tipoCargaService.getById(tipoId)
         setFormData(response.data)
-      } catch {
-        setFeedback('Nao foi possivel carregar os dados do tipo de carga.')
+      } catch (error) {
+        setFeedback(getHttpErrorMessage(error, 'Nao foi possivel carregar os dados do tipo de carga.'))
       } finally {
         setIsLoading(false)
       }
@@ -59,8 +60,8 @@ export function TipoCargaFormPage() {
       }
 
       navigate('/dashboard/tipos-carga/listar', { replace: true })
-    } catch {
-      setFeedback('Nao foi possivel salvar o tipo de carga. Revise os dados e tente novamente.')
+    } catch (error) {
+      setFeedback(getHttpErrorMessage(error, 'Nao foi possivel salvar o tipo de carga. Revise os dados e tente novamente.'))
     } finally {
       setIsSaving(false)
     }
@@ -101,11 +102,11 @@ export function TipoCargaFormPage() {
           <div className="entity-form__grid entity-form__grid--2">
             <label className="entity-field entity-field--span-2">
               <span>Nome</span>
-              <input name="nome" value={formData.nome} onChange={handleChange} required />
+              <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Carga refrigerada" required />
             </label>
             <label className="entity-field entity-field--span-2">
               <span>Descricao</span>
-              <textarea name="descricao" value={formData.descricao} onChange={handleChange} rows={8} />
+              <textarea name="descricao" value={formData.descricao} onChange={handleChange} rows={8} placeholder="Detalhes operacionais, restricoes ou observacoes da carga" />
             </label>
           </div>
         </article>

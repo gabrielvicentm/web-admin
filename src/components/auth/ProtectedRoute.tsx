@@ -4,7 +4,7 @@ import { sessionService } from '../../services/sessionService'
 export function ProtectedRoute() {
   const location = useLocation()
 
-  if (!sessionService.isAuthenticated()) {
+  if (!sessionService.hasUsableSession()) {
     return <Navigate replace to="/login" state={{ from: location }} />
   }
 

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { sessionService } from './sessionService'
+import { attachAuthInterceptors } from './api'
 
 export type RelatorioViagensParams = {
   data_saida_de?: string
@@ -19,15 +19,7 @@ const reportsApi = axios.create({
   baseURL: '/reports-api',
 })
 
-reportsApi.interceptors.request.use((config) => {
-  const token = sessionService.getAccessToken()
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-
-  return config
-})
+attachAuthInterceptors(reportsApi)
 
 export const relatoriosService = {
   async listarViagens(params: RelatorioViagensParams) {
