@@ -3,10 +3,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { clienteService, type Cliente } from '../services/clienteService'
 import { motoristaService, type MotoristaListItem } from '../services/motoristaService'
 import { relatoriosService, type RelatorioViagensParams } from '../services/relatoriosService'
-import { veiculoService, type VeiculoListItem } from '../services/veiculoService'
+import {
+  veiculoService,
+  type VeiculoConsumoMedioItem,
+  type VeiculoCustoTotalItem,
+  type VeiculoListItem,
+} from '../services/veiculoService'
 
 type PreviewRow = Record<string, unknown>
 type PreviewStatus = 'idle' | 'loading' | 'success' | 'error'
+type FleetRankingStatus = 'idle' | 'loading' | 'success' | 'error'
 
 const statusOptions = [
   { value: '', label: 'Todos os status' },
@@ -49,6 +55,19 @@ function buildApiDate(value: string) {
   return `${year}-${month}-${day}`
 }
 
+function formatCurrency(value?: number | string) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value ?? 0))
+}
+
+function formatNumber(value?: number | string, suffix = '') {
+  const formatted = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(Number(value ?? 0))
+
+  return suffix ? `${formatted} ${suffix}` : formatted
+}
+
 function formatCellValue(value: unknown) {
   if (value === null || value === undefined || value === '') {
     return '—'
@@ -85,6 +104,10 @@ export function RelatoriosPage() {
   const [previewRows, setPreviewRows] = useState<PreviewRow[]>([])
   const [previewTotal, setPreviewTotal] = useState(0)
   const [previewStatus, setPreviewStatus] = useState<PreviewStatus>('idle')
+  const [fleetSearch, setFleetSearch] = useState('')
+  const [consumoRanking, setConsumoRanking] = useState<VeiculoConsumoMedioItem[]>([])
+  const [custosRanking, setCustosRanking] = useState<VeiculoCustoTotalItem[]>([])
+  const [fleetRankingStatus, setFleetRankingStatus] = useState<FleetRankingStatus>('idle')
   const [feedback, setFeedback] = useState('')
   const [isLoadingFilters, setIsLoadingFilters] = useState(true)
   const [isExportingCsv, setIsExportingCsv] = useState(false)
@@ -126,6 +149,29 @@ export function RelatoriosPage() {
 
     void loadFilters()
   }, [])
+
+  useEffect(() => {
+    async function loadFleetRankings() {
+      try {
+        setFleetRankingStatus('loading')
+
+        const [consumoResponse, custosResponse] = await Promise.all([
+          veiculoService.listConsumoMedio({ search: fleetSearch, page: 1, limit: 8 }),
+          veiculoService.listCustosTotais({ search: fleetSearch, page: 1, limit: 8 }),
+        ])
+
+        setConsumoRanking(consumoResponse.data)
+        setCustosRanking(custosResponse.data)
+        setFleetRankingStatus('success')
+      } catch {
+        setConsumoRanking([])
+        setCustosRanking([])
+        setFleetRankingStatus('error')
+      }
+    }
+
+    void loadFleetRankings()
+  }, [fleetSearch])
 
   function handleFilterChange(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = event.target
@@ -346,9 +392,9 @@ export function RelatoriosPage() {
             <div className="dashboard-metric">
               <div className="dashboard-metric__icon">2</div>
               <div>
-                <p>Proximos da fila</p>
-                <strong>Combustivel e manutencoes</strong>
-                <span>Ja podem seguir o mesmo padrao de filtros e exportacoes.</span>
+                <p>Disponivel agora</p>
+                <strong>Ranking da frota</strong>
+                <span>Consumo medio e custo total por veiculo conectados diretamente aos novos endpoints.</span>
               </div>
             </div>
             <div className="dashboard-metric">
@@ -397,6 +443,95 @@ export function RelatoriosPage() {
               ))}
             </div>
           )}
+        </article>
+
+        <article className="dashboard-panel dashboard-panel--span-12 reports-fleet">
+          <div className="dashboard-panel__header">
+            <div>
+              <h2>Ranking da frota</h2>
+              <p>Comparativo alimentado pelos endpoints agregados de consumo medio e custo total por veiculo.</p>
+            </div>
+            <div className="reports-fleet__actions">
+              <label className="entity-field reports-fleet__search">
+                <span>Buscar veiculo</span>
+                <input
+                  value={fleetSearch}
+                  onChange={(event) => setFleetSearch(event.target.value)}
+                  placeholder="Placa ou modelo"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="reports-fleet-grid">
+            <section className="reports-fleet-panel">
+              <div className="dashboard-panel__header">
+                <div>
+                  <h2>Top consumo medio</h2>
+                  <p>Maior eficiencia km/l da frota.</p>
+                </div>
+              </div>
+
+              {fleetRankingStatus === 'loading' ? (
+                <div className="entity-empty-state">Carregando consumo medio...</div>
+              ) : consumoRanking.length === 0 ? (
+                <div className="entity-empty-state">Nenhum dado de consumo medio encontrado.</div>
+              ) : (
+                <div className="reports-preview-table">
+                  <div className="reports-preview-table__head reports-preview-table__head--fleet">
+                    <span>Veiculo</span>
+                    <span>Consumo</span>
+                    <span>Base</span>
+                  </div>
+
+                  {consumoRanking.map((item) => (
+                    <div className="reports-preview-table__row reports-preview-table__row--fleet" key={item.veiculo_id}>
+                      <span>
+                        <strong>{item.placa}</strong>
+                        <small>{item.modelo}</small>
+                      </span>
+                      <span>{formatNumber(item.consumo_km_por_litro, 'km/l')}</span>
+                      <span>{formatNumber(item.total_abastecimentos)} abastecimentos</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="reports-fleet-panel">
+              <div className="dashboard-panel__header">
+                <div>
+                  <h2>Maiores custos totais</h2>
+                  <p>Visao consolidada de combustivel e manutencao.</p>
+                </div>
+              </div>
+
+              {fleetRankingStatus === 'loading' ? (
+                <div className="entity-empty-state">Carregando custos totais...</div>
+              ) : custosRanking.length === 0 ? (
+                <div className="entity-empty-state">Nenhum dado de custo total encontrado.</div>
+              ) : (
+                <div className="reports-preview-table">
+                  <div className="reports-preview-table__head reports-preview-table__head--fleet">
+                    <span>Veiculo</span>
+                    <span>Custo total</span>
+                    <span>Manutencao</span>
+                  </div>
+
+                  {custosRanking.map((item) => (
+                    <div className="reports-preview-table__row reports-preview-table__row--fleet" key={item.veiculo_id}>
+                      <span>
+                        <strong>{item.placa}</strong>
+                        <small>{item.modelo}</small>
+                      </span>
+                      <span>{formatCurrency(item.custo_total)}</span>
+                      <span>{formatCurrency(item.custo_manutencao)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         </article>
       </div>
     </section>

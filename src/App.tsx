@@ -24,6 +24,7 @@ import { ViagemDetailPage } from './pages/ViagemDetailPage'
 import { ViagemFormPage } from './pages/ViagemFormPage'
 import { ViagensListPage } from './pages/ViagensListPage'
 import { VeiculoFormPage } from './pages/VeiculoFormPage'
+import { VeiculoDetailPage } from './pages/VeiculoDetailPage'
 import { VeiculosListPage } from './pages/VeiculosListPage'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
           <Route path="viagens/:id/editar" element={<ViagemDetailPage />} />
           <Route path="veiculos/listar" element={<VeiculosListPage />} />
           <Route path="veiculos/novo" element={<VeiculoFormPage />} />
+          <Route path="veiculos/:id/detalhes" element={<VeiculoDetailPage />} />
           <Route path="veiculos/:id/editar" element={<VeiculoFormPage />} />
           <Route path="clientes/listar" element={<ClientesListPage />} />
           <Route path="clientes/novo" element={<ClienteFormPage />} />

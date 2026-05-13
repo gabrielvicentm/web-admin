@@ -493,9 +493,47 @@ body {
 
 .reports-builder,
 .reports-sidepanel,
-.reports-preview {
+.reports-preview,
+.reports-fleet {
   display: grid;
   gap: 20px;
+}
+
+.reports-fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.reports-fleet-panel {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.reports-fleet__actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.reports-fleet__search {
+  min-width: min(280px, 100%);
+}
+
+.reports-preview-table__head--fleet,
+.reports-preview-table__row--fleet {
+  grid-template-columns: minmax(0, 1.15fr) minmax(140px, 0.8fr) minmax(140px, 0.8fr);
+}
+
+.reports-preview-table__row--fleet strong {
+  display: block;
+}
+
+.reports-preview-table__row--fleet small {
+  display: block;
+  margin-top: 6px;
+  color: var(--dashboard-text-soft);
 }
 
 .reports-filters-grid {
@@ -656,6 +694,10 @@ body {
   .reports-filters-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .reports-fleet-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -688,6 +730,15 @@ body {
 
   .reports-actions {
     flex-direction: column;
+  }
+
+  .reports-fleet__actions {
+    width: 100%;
+  }
+
+  .reports-fleet__search {
+    min-width: 0;
+    width: 100%;
   }
 }
 
@@ -920,7 +971,19 @@ body {
 
 .entity-table__head--veiculos,
 .entity-table__row--veiculos {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(0, 0.82fr) 0.7fr minmax(260px, 0.9fr);
+}
+
+.entity-table__head--veiculos span:nth-child(2),
+.entity-table__head--veiculos span:nth-child(3),
+.entity-table__head--veiculos span:nth-child(4),
+.entity-table__head--veiculos span:nth-child(5) {
+  text-align: center;
+}
+
+.entity-table__head--veiculos span:first-child,
+.entity-table__main--veiculos span:first-child {
+  padding-left: 14px;
 }
 
 .entity-table__head--viagens,
@@ -999,8 +1062,15 @@ body {
 }
 
 .entity-table__main--veiculos {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 0.8fr;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(0, 0.82fr) 0.7fr;
   grid-column: 1 / span 4;
+}
+
+.entity-table__main--veiculos span:nth-child(2),
+.entity-table__main--veiculos span:nth-child(3),
+.entity-table__main--veiculos span:nth-child(4) {
+  justify-self: center;
+  text-align: center;
 }
 
 .entity-table__main--viagens {
@@ -1075,6 +1145,21 @@ body {
   align-content: center;
   gap: 12px;
   grid-column: 5;
+}
+
+.entity-table__actions--veiculos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  justify-self: center;
+  align-self: center;
+  width: min(100%, 252px);
+}
+
+.entity-table__actions--veiculos > * {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 0.88rem;
 }
 
 .entity-table__actions--motoristas > * {
@@ -1402,6 +1487,50 @@ body {
   align-items: start;
 }
 
+.vehicle-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.78fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.vehicle-history-toolbar {
+  grid-template-columns: repeat(2, minmax(180px, 0.5fr)) auto;
+}
+
+.vehicle-history-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.vehicle-history-stack small {
+  display: block;
+  margin-top: 8px;
+  color: var(--dashboard-text-soft);
+}
+
+.vehicle-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.vehicle-comparison-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.vehicle-comparison-panel h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.entity-table__head--vehicle-ranking,
+.entity-table__row--vehicle-ranking {
+  grid-template-columns: minmax(0, 1.2fr) minmax(150px, 0.9fr);
+}
+
 .trip-linked-panel {
   position: sticky;
   top: 104px;
@@ -1638,6 +1767,14 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .vehicle-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
   .trip-linked-panel {
     position: static;
   }
@@ -1700,6 +1837,11 @@ body {
     flex-wrap: wrap;
   }
 
+  .entity-table__actions--veiculos {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
   .entity-form__grid--2,
   .entity-form__grid--3,
   .entity-form__grid--4 {
@@ -1715,6 +1857,10 @@ body {
   }
 
   .trip-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-history-toolbar {
     grid-template-columns: 1fr;
   }
 

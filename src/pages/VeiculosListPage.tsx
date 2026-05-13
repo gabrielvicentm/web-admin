@@ -250,11 +250,14 @@ export function VeiculosListPage() {
                         <span className={`entity-status entity-status--${item.status}`}>{formatLabel(item.status)}</span>
                       </span>
                     </button>
-                    <span className="entity-table__actions">
+                    <span className="entity-table__actions entity-table__actions--veiculos">
+                      <Link className="entity-action entity-action--ghost" to={`/dashboard/veiculos/${item.id}/detalhes`}>
+                        Detalhes
+                      </Link>
                       <Link className="entity-action entity-action--ghost" to={`/dashboard/veiculos/${item.id}/editar`}>
                         Editar
                       </Link>
-                      <Link className="entity-action entity-action--secondary" to={`/dashboard/veiculos/${item.id}/manutencoes`}>
+                      <Link className="entity-action entity-action--ghost" to={`/dashboard/veiculos/${item.id}/manutencoes`}>
                         Manutencoes
                       </Link>
                       <button className="entity-action entity-action--danger" type="button" onClick={() => void handleDelete(item.id)}>

@@ -67,6 +67,26 @@ export type VeiculoHistoricoItem = {
   status?: string
 }
 
+export type VeiculoConsumoMedioItem = {
+  veiculo_id: string
+  placa: string
+  modelo: string
+  total_abastecimentos: number
+  total_litros: number
+  km_percorridos: number
+  consumo_km_por_litro: number
+  custo_combustivel: number
+}
+
+export type VeiculoCustoTotalItem = {
+  veiculo_id: string
+  placa: string
+  modelo: string
+  custo_combustivel: number
+  custo_manutencao: number
+  custo_total: number
+}
+
 type ListVeiculosParams = {
   search?: string
   status?: string
@@ -151,6 +171,16 @@ export const veiculoService = {
 
   async getHistorico(id: string | number) {
     const response = await api.get<ApiResponse<VeiculoHistoricoItem[]>>(`/admin/veiculos/${id}/historico`)
+    return response.data
+  },
+
+  async listConsumoMedio(params: { search?: string; page?: number; limit?: number }) {
+    const response = await api.get<PaginatedApiResponse<VeiculoConsumoMedioItem[]>>('/admin/veiculos/consumo-medio', { params })
+    return response.data
+  },
+
+  async listCustosTotais(params: { search?: string; page?: number; limit?: number }) {
+    const response = await api.get<PaginatedApiResponse<VeiculoCustoTotalItem[]>>('/admin/veiculos/custos-totais', { params })
     return response.data
   },
 }
