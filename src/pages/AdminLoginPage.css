@@ -237,6 +237,34 @@
   font: 600 0.98rem 'Manrope', sans-serif;
 }
 
+.admin-login-form__success {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(31, 210, 138, 0.2);
+  background: rgba(31, 210, 138, 0.1);
+  color: #bbf6d9;
+  font: 600 0.98rem 'Manrope', sans-serif;
+}
+
+.admin-login-form__links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.admin-login-form__link {
+  color: #8fc0ff;
+  font: 700 0.96rem 'Manrope', sans-serif;
+  text-decoration: none;
+}
+
+.admin-login-form__link:hover {
+  color: #d9e8ff;
+}
+
 .admin-login-form__button {
   min-height: 62px;
   border: 0;

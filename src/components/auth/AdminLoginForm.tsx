@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import logoImage from '../../assets/logo.png'
 
 type AdminLoginFormValues = {
@@ -91,6 +92,11 @@ export function AdminLoginForm({ onSubmit, errorMessage = '' }: AdminLoginFormPr
 
       <div className="admin-login-form__actions">
         {errorMessage ? <p className="admin-login-form__error">{errorMessage}</p> : null}
+        <div className="admin-login-form__links">
+          <Link className="admin-login-form__link" to="/reset-password">
+            Recebeu um token? Redefinir senha
+          </Link>
+        </div>
         <button
           className="admin-login-form__button admin-login-form__button--primary"
           type="submit"

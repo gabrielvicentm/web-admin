@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute'
 import { AdminLoginPage } from './pages/AdminLoginPage'
+import { AdminPasswordResetPage } from './pages/AdminPasswordResetPage'
 import { AbastecimentosListPage } from './pages/AbastecimentosListPage'
 import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
@@ -21,6 +22,7 @@ import { RelatorioFolhaPagamentoPage } from './pages/RelatorioFolhaPagamentoPage
 import { RelatorioOperacionalPage } from './pages/RelatorioOperacionalPage'
 import { RelatorioViagensPage } from './pages/RelatorioViagensPage'
 import { RelatoriosPage } from './pages/RelatoriosPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SectionPage } from './pages/SectionPage'
 import { TipoCargaFormPage } from './pages/TipoCargaFormPage'
 import { TiposCargaListPage } from './pages/TiposCargaListPage'
@@ -37,6 +39,7 @@ function App() {
       <Route path="/" element={<Navigate replace to="/dashboard" />} />
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<AdminLoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />}>
@@ -70,6 +73,7 @@ function App() {
           <Route path="notificacoes" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
+          <Route path="acessos/reset-senha" element={<AdminPasswordResetPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />
           <Route path="relatorios/viagens" element={<RelatorioViagensPage />} />
           <Route path="relatorios/folha-pagamento" element={<RelatorioFolhaPagamentoPage />} />
