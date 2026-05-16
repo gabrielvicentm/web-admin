@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute'
 import { AdminLoginPage } from './pages/AdminLoginPage'
+import { AbastecimentosListPage } from './pages/AbastecimentosListPage'
 import { ClienteFormPage } from './pages/ClienteFormPage'
 import { ClientesListPage } from './pages/ClientesListPage'
 import { DashboardHome } from './pages/DashboardHome'
@@ -61,7 +62,7 @@ function App() {
           <Route path="manutencoes/nova" element={<ManutencaoFormPage />} />
           <Route path="manutencoes/:id/editar" element={<ManutencaoFormPage />} />
           <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
-          <Route path="abastecimentos" element={<SectionPage />} />
+          <Route path="abastecimentos" element={<AbastecimentosListPage />} />
           <Route path="ocorrencias" element={<SectionPage />} />
           <Route path="notificacoes" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
