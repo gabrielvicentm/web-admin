@@ -17,6 +17,9 @@ import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
 import { ManutencoesListPage } from './pages/ManutencoesListPage'
 import { MotoristaFormPage } from './pages/MotoristaFormPage'
 import { MotoristasListPage } from './pages/MotoristasListPage'
+import { RelatorioFolhaPagamentoPage } from './pages/RelatorioFolhaPagamentoPage'
+import { RelatorioOperacionalPage } from './pages/RelatorioOperacionalPage'
+import { RelatorioViagensPage } from './pages/RelatorioViagensPage'
 import { RelatoriosPage } from './pages/RelatoriosPage'
 import { SectionPage } from './pages/SectionPage'
 import { TipoCargaFormPage } from './pages/TipoCargaFormPage'
@@ -68,6 +71,9 @@ function App() {
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
           <Route path="relatorios" element={<RelatoriosPage />} />
+          <Route path="relatorios/viagens" element={<RelatorioViagensPage />} />
+          <Route path="relatorios/folha-pagamento" element={<RelatorioFolhaPagamentoPage />} />
+          <Route path="relatorios/:tipo" element={<RelatorioOperacionalPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate replace to="/dashboard" />} />

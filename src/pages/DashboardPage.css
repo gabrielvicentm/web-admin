@@ -300,6 +300,10 @@ body {
   gap: 24px;
 }
 
+.reports-page .dashboard-layout-grid {
+  align-items: start;
+}
+
 .dashboard-hero {
   display: flex;
   align-items: flex-start;
@@ -554,11 +558,167 @@ body {
 }
 
 .reports-builder,
+.reports-directory,
+.reports-main-column,
 .reports-sidepanel,
 .reports-preview,
 .reports-fleet {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+  align-content: start;
+  align-items: start;
+}
+
+.reports-main-column {
+  min-width: 0;
+}
+
+.reports-builder .dashboard-panel__header,
+.reports-directory .dashboard-panel__header,
+.reports-sidepanel .dashboard-panel__header,
+.reports-preview .dashboard-panel__header,
+.reports-fleet .dashboard-panel__header {
+  margin-bottom: 0;
+}
+
+.reports-backlink {
+  width: fit-content;
+  color: #8eb8ff;
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.reports-backlink:hover {
+  color: #b3ceff;
+}
+
+.reports-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.reports-directory-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  text-decoration: none;
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.reports-directory-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(126, 177, 255, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.reports-directory-card__icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.reports-directory-card--blue .reports-directory-card__icon {
+  background: rgba(76, 141, 255, 0.14);
+  color: #7fb1ff;
+}
+
+.reports-directory-card--cyan .reports-directory-card__icon {
+  background: rgba(51, 199, 255, 0.14);
+  color: #7adfff;
+}
+
+.reports-directory-card--green .reports-directory-card__icon {
+  background: rgba(31, 210, 138, 0.14);
+  color: #7de8ba;
+}
+
+.reports-directory-card--orange .reports-directory-card__icon {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd080;
+}
+
+.reports-directory-card__content strong {
+  display: block;
+  font-size: 1.04rem;
+}
+
+.reports-directory-card__content p {
+  margin: 8px 0 0;
+  color: var(--dashboard-text-soft);
+  line-height: 1.5;
+}
+
+.reports-directory-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reports-directory-card__chips span,
+.reports-directory-card__action {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.reports-directory-card__chips span {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--dashboard-text-soft);
+}
+
+.reports-directory-card__action {
+  background: rgba(76, 141, 255, 0.14);
+  color: #9ec2ff;
+}
+
+.reports-related {
+  display: grid;
+  gap: 12px;
+}
+
+.reports-related-list {
+  display: grid;
+  gap: 10px;
+}
+
+.reports-related-link {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  text-decoration: none;
+  transition: background 0.22s ease, transform 0.22s ease;
+}
+
+.reports-related-link:hover {
+  transform: translateY(-1px);
+  background: rgba(76, 141, 255, 0.08);
+}
+
+.reports-related-link strong {
+  font-size: 0.96rem;
+}
+
+.reports-related-link span {
+  color: var(--dashboard-text-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .reports-fleet-grid {
@@ -601,13 +761,31 @@ body {
 .reports-filters-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px 16px;
 }
 
 .reports-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.reports-builder .entity-field input,
+.reports-builder .entity-field select {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.reports-builder .entity-field {
+  gap: 6px;
+}
+
+.reports-actions .entity-action {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
 }
 
 .reports-preview-table {
@@ -755,6 +933,10 @@ body {
 
   .reports-filters-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reports-directory-grid {
+    grid-template-columns: 1fr;
   }
 
   .reports-fleet-grid {
