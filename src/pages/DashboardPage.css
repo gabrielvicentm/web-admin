@@ -1068,18 +1068,63 @@ body {
 
 .history-toolbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(7, minmax(130px, 0.72fr)) auto auto;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(6, minmax(130px, 0.72fr)) auto auto;
   gap: 14px;
   align-items: end;
   padding: 18px;
   border: 1px solid var(--dashboard-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  background:
+    radial-gradient(circle at top right, rgba(76, 141, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
   box-shadow: var(--dashboard-shadow);
 }
 
 .history-toolbar__field--wide {
   min-width: 0;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.history-summary-card {
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  box-shadow: var(--dashboard-shadow);
+}
+
+.history-summary-card span,
+.history-summary-card small {
+  display: block;
+  color: var(--dashboard-text-soft);
+}
+
+.history-summary-card strong {
+  display: block;
+  margin: 10px 0 8px;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.history-summary-card--blue strong {
+  color: #9ec2ff;
+}
+
+.history-summary-card--green strong {
+  color: #97f0c8;
+}
+
+.history-summary-card--cyan strong {
+  color: #89e7ff;
+}
+
+.history-summary-card--orange strong {
+  color: #ffd392;
 }
 
 .entity-toolbar--compact {
@@ -1300,14 +1345,29 @@ body {
 
 .history-row {
   width: 100%;
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  background: transparent;
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
   color: var(--dashboard-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.history-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(76, 141, 255, 0.18);
+  background: rgba(76, 141, 255, 0.05);
+}
+
+.history-row.is-selected {
+  border-color: rgba(76, 141, 255, 0.28);
+  background: linear-gradient(90deg, rgba(76, 141, 255, 0.1), rgba(76, 141, 255, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(76, 141, 255, 0.12);
 }
 
 .entity-table__main--motoristas {
@@ -1425,6 +1485,39 @@ body {
   align-content: center;
   gap: 6px;
   min-width: 0;
+}
+
+.history-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.history-badge--success {
+  background: rgba(31, 210, 138, 0.14);
+  color: #9af0ca;
+}
+
+.history-badge--info {
+  background: rgba(76, 141, 255, 0.14);
+  color: #a6c7ff;
+}
+
+.history-badge--warning {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd392;
+}
+
+.history-badge--neutral {
+  background: rgba(255, 255, 255, 0.07);
+  color: #dbe6f8;
 }
 
 .entity-table__cell--status {
@@ -1653,6 +1746,12 @@ body {
   color: var(--dashboard-text);
 }
 
+.history-detail-grid {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .entity-metric-list {
   display: grid;
   gap: 10px;
@@ -1864,6 +1963,7 @@ body {
   gap: 12px;
   padding: 14px 16px;
   border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -2013,6 +2113,10 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .history-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .history-toolbar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -2074,6 +2178,10 @@ body {
   .entity-table__row--viagens,
   .entity-table__row--manutencoes,
   .entity-table__row--historico {
+    grid-template-columns: 1fr;
+  }
+
+  .history-summary-grid {
     grid-template-columns: 1fr;
   }
 

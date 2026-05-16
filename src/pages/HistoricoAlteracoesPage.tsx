@@ -7,7 +7,6 @@ import {
 
 type LoadOverrides = {
   search?: string
-  entidade?: string
   entidadeId?: string
   acao?: string
   usuario?: string
@@ -58,6 +57,19 @@ function getChangeDate(item: HistoricoAlteracao) {
   return item.criado_em ?? item.data_alteracao
 }
 
+function getActionTone(action?: string) {
+  switch (action) {
+    case 'create':
+      return 'success'
+    case 'update':
+      return 'info'
+    case 'status':
+      return 'warning'
+    default:
+      return 'neutral'
+  }
+}
+
 function buildChangeList(item: HistoricoAlteracao | null): HistoricoAlteracaoCampo[] {
   if (!item) {
     return []
@@ -83,7 +95,6 @@ function buildChangeList(item: HistoricoAlteracao | null): HistoricoAlteracaoCam
 export function HistoricoAlteracoesPage() {
   const [items, setItems] = useState<HistoricoAlteracao[]>([])
   const [search, setSearch] = useState('')
-  const [entidade, setEntidade] = useState('')
   const [entidadeId, setEntidadeId] = useState('')
   const [acao, setAcao] = useState('')
   const [usuario, setUsuario] = useState('')
@@ -98,10 +109,27 @@ export function HistoricoAlteracoesPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
   const selectedChanges = useMemo(() => buildChangeList(selectedItem), [selectedItem])
+  const actionSummary = useMemo(() => {
+    return items.reduce(
+      (acc, item) => {
+        if (item.acao === 'create') {
+          acc.creates += 1
+        } else if (item.acao === 'update') {
+          acc.updates += 1
+        } else if (item.acao === 'status') {
+          acc.status += 1
+        } else {
+          acc.events += 1
+        }
+
+        return acc
+      },
+      { creates: 0, updates: 0, status: 0, events: 0 },
+    )
+  }, [items])
 
   async function loadHistorico(overrides: LoadOverrides = {}) {
     const nextSearch = overrides.search ?? search
-    const nextEntidade = overrides.entidade ?? entidade
     const nextEntidadeId = overrides.entidadeId ?? entidadeId
     const nextAcao = overrides.acao ?? acao
     const nextUsuario = overrides.usuario ?? usuario
@@ -116,7 +144,7 @@ export function HistoricoAlteracoesPage() {
 
       const response = await historicoAlteracoesService.list({
         search: nextSearch,
-        entidade: nextEntidade,
+        entidade: 'viagens',
         entidade_id: nextEntidadeId,
         acao: nextAcao,
         usuario: nextUsuario,
@@ -146,7 +174,6 @@ export function HistoricoAlteracoesPage() {
 
   function handleClearFilters() {
     setSearch('')
-    setEntidade('')
     setEntidadeId('')
     setAcao('')
     setUsuario('')
@@ -155,7 +182,6 @@ export function HistoricoAlteracoesPage() {
     setPage(1)
     void loadHistorico({
       search: '',
-      entidade: '',
       entidadeId: '',
       acao: '',
       usuario: '',
@@ -178,17 +204,42 @@ export function HistoricoAlteracoesPage() {
       <header className="entity-page__hero">
         <div>
           <p className="dashboard-eyebrow">Auditoria</p>
-          <h1 className="dashboard-title">Historico de alteracoes</h1>
+          <h1 className="dashboard-title">Historico de alteracoes de viagens</h1>
           <p className="dashboard-subtitle">
-            Consulte registros gerados pelo service Go com usuario, entidade, acao e diferencas entre os dados anteriores e novos.
+            Esta tela mostra a trilha de auditoria das viagens: criacao, edicao, mudanca de status e eventos operacionais vinculados a elas.
           </p>
         </div>
         <div className="entity-page__hero-actions">
+          <span className="dashboard-chip dashboard-chip--success">{total} registros</span>
+          <span className="dashboard-chip">Somente viagens</span>
           <button className="dashboard-chip" type="button" onClick={() => void loadHistorico()}>
             Atualizar historico
           </button>
         </div>
       </header>
+
+      <section className="history-summary-grid">
+        <article className="history-summary-card history-summary-card--blue">
+          <span>Total carregado</span>
+          <strong>{total}</strong>
+          <small>Resultados da pagina atual e filtros aplicados.</small>
+        </article>
+        <article className="history-summary-card history-summary-card--green">
+          <span>Criacoes</span>
+          <strong>{actionSummary.creates}</strong>
+          <small>Novas viagens registradas.</small>
+        </article>
+        <article className="history-summary-card history-summary-card--cyan">
+          <span>Edicoes</span>
+          <strong>{actionSummary.updates}</strong>
+          <small>Ajustes de campos e dados operacionais.</small>
+        </article>
+        <article className="history-summary-card history-summary-card--orange">
+          <span>Status e eventos</span>
+          <strong>{actionSummary.status + actionSummary.events}</strong>
+          <small>Paradas, finalizacoes e eventos de apoio.</small>
+        </article>
+      </section>
 
       <div className="history-toolbar">
         <div className="entity-toolbar__field history-toolbar__field--wide">
@@ -197,25 +248,21 @@ export function HistoricoAlteracoesPage() {
             id="historico-search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Resumo, usuario, entidade ou identificador"
+            placeholder="Resumo, motorista da viagem, placa, cliente ou identificador"
           />
         </div>
         <div className="entity-toolbar__field">
-          <label htmlFor="historico-entidade">Entidade</label>
-          <input id="historico-entidade" value={entidade} onChange={(event) => setEntidade(event.target.value)} placeholder="viagens" />
+          <label htmlFor="historico-entidade-id">ID da viagem</label>
+          <input id="historico-entidade-id" value={entidadeId} onChange={(event) => setEntidadeId(event.target.value)} placeholder="UUID da viagem" />
         </div>
         <div className="entity-toolbar__field">
-          <label htmlFor="historico-entidade-id">ID</label>
-          <input id="historico-entidade-id" value={entidadeId} onChange={(event) => setEntidadeId(event.target.value)} placeholder="123" />
-        </div>
-        <div className="entity-toolbar__field">
-          <label htmlFor="historico-acao">Acao</label>
+          <label htmlFor="historico-acao">Tipo de evento</label>
           <select id="historico-acao" value={acao} onChange={(event) => setAcao(event.target.value)}>
             <option value="">Todas</option>
-            <option value="create">Create</option>
-            <option value="update">Update</option>
-            <option value="delete">Delete</option>
-            <option value="status">Status</option>
+            <option value="create">Criacao</option>
+            <option value="update">Edicao</option>
+            <option value="status">Mudanca de status</option>
+            <option value="evento">Evento operacional</option>
           </select>
         </div>
         <div className="entity-toolbar__field">
@@ -262,6 +309,7 @@ export function HistoricoAlteracoesPage() {
               <h2>Eventos registrados</h2>
               <p>{total} registros encontrados</p>
             </div>
+            <span className="dashboard-chip">Pagina {page} de {totalPages}</span>
           </div>
 
           {isLoading ? (
@@ -273,7 +321,7 @@ export function HistoricoAlteracoesPage() {
               <div className="entity-table">
                 <div className="entity-table__head entity-table__head--historico">
                   <span>Evento</span>
-                  <span>Entidade</span>
+                  <span>Viagem</span>
                   <span>Usuario</span>
                   <span>Data</span>
                 </div>
@@ -286,11 +334,11 @@ export function HistoricoAlteracoesPage() {
                     onClick={() => setSelectedItem(item)}
                   >
                     <span className="entity-table__cell">
-                      <strong>{formatLabel(item.acao)}</strong>
+                      <strong className={`history-badge history-badge--${getActionTone(item.acao)}`}>{formatLabel(item.acao)}</strong>
                       <small>{item.resumo ?? `Registro #${item.id}`}</small>
                     </span>
                     <span className="entity-table__cell">
-                      <strong>{formatLabel(item.entidade)}</strong>
+                      <strong>Viagem</strong>
                       <small>{item.entidade_id ? `ID ${item.entidade_id}` : 'Sem identificador'}</small>
                     </span>
                     <span className="entity-table__cell">
@@ -324,7 +372,7 @@ export function HistoricoAlteracoesPage() {
           <div className="entity-card__header">
             <div>
               <h2>Detalhe da alteracao</h2>
-              <p>{selectedItem ? `${formatLabel(selectedItem.entidade)} #${selectedItem.entidade_id ?? selectedItem.id}` : 'Selecione um evento'}</p>
+              <p>{selectedItem ? `Viagem #${selectedItem.entidade_id ?? selectedItem.id}` : 'Selecione um evento'}</p>
             </div>
           </div>
 
@@ -343,7 +391,7 @@ export function HistoricoAlteracoesPage() {
                 </div>
               </div>
 
-              <div className="entity-detail-grid">
+              <div className="entity-detail-grid history-detail-grid">
                 <span>Usuario</span>
                 <strong>{selectedItem.usuario_nome ?? selectedItem.usuario_email ?? `#${selectedItem.usuario_id ?? '-'}`}</strong>
                 <span>Data</span>
