@@ -18,6 +18,7 @@ import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
 import { ManutencoesListPage } from './pages/ManutencoesListPage'
 import { MotoristaFormPage } from './pages/MotoristaFormPage'
 import { MotoristasListPage } from './pages/MotoristasListPage'
+import { OcorrenciasPage } from './pages/OcorrenciasPage'
 import { RelatorioFolhaPagamentoPage } from './pages/RelatorioFolhaPagamentoPage'
 import { RelatorioOperacionalPage } from './pages/RelatorioOperacionalPage'
 import { RelatorioViagensPage } from './pages/RelatorioViagensPage'
@@ -69,7 +70,7 @@ function App() {
           <Route path="manutencoes/:id/editar" element={<ManutencaoFormPage />} />
           <Route path="veiculos/:veiculoId/manutencoes" element={<ManutencoesHistoricoPage />} />
           <Route path="abastecimentos" element={<AbastecimentosListPage />} />
-          <Route path="ocorrencias" element={<SectionPage />} />
+          <Route path="ocorrencias" element={<OcorrenciasPage />} />
           <Route path="notificacoes" element={<SectionPage />} />
           <Route path="folha-pagamento" element={<FolhaPagamentoPage />} />
           <Route path="historico-alteracoes" element={<HistoricoAlteracoesPage />} />
