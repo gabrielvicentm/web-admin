@@ -86,6 +86,7 @@ const navigationItems: DashboardNavItem[] = [
   { label: 'Ocorrencias', icon: AlertIcon, to: '/dashboard/ocorrencias' },
   { label: 'Notificacoes', icon: BellIcon, to: '/dashboard/notificacoes', badgeKey: 'notifications' },
   { label: 'Folha de pagamento', icon: PayrollIcon, to: '/dashboard/folha-pagamento' },
+  { label: 'Reset de senha', icon: UserBadgeIcon, to: '/dashboard/acessos/reset-senha' },
   { label: 'Historico de alteracoes', icon: ListIcon, to: '/dashboard/historico-alteracoes' },
   { label: 'Relatorios', icon: ReportIcon, to: '/dashboard/relatorios' },
 ]

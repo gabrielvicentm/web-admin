@@ -1,0 +1,122 @@
+.abastecimentos-page {
+  gap: 22px;
+}
+
+.abastecimentos-hero {
+  border: 1px solid rgba(31, 210, 138, 0.18);
+  background:
+    linear-gradient(135deg, rgba(31, 210, 138, 0.12), rgba(76, 141, 255, 0.08)),
+    rgba(9, 15, 27, 0.72);
+}
+
+.abastecimentos-toolbar {
+  align-items: end;
+  border: 1px solid rgba(125, 154, 196, 0.14);
+  background: rgba(11, 19, 34, 0.76);
+}
+
+.abastecimentos-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.36fr);
+}
+
+.abastecimentos-table__head,
+.abastecimentos-table__row {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(150px, 0.85fr) minmax(180px, 1fr) minmax(150px, 0.82fr) minmax(150px, 0.78fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.abastecimentos-table__head {
+  padding: 0 0 14px;
+  color: var(--dashboard-text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.abastecimentos-table__row {
+  width: 100%;
+  padding: 16px 14px;
+  border: 1px solid transparent;
+  border-top-color: rgba(125, 154, 196, 0.1);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dashboard-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.abastecimentos-table__row:hover,
+.abastecimentos-table__row.is-selected {
+  border-color: rgba(31, 210, 138, 0.22);
+  background: rgba(31, 210, 138, 0.07);
+  transform: translateY(-1px);
+}
+
+.abastecimentos-table__row span {
+  min-width: 0;
+}
+
+.abastecimentos-table__row strong,
+.abastecimentos-table__row small {
+  display: block;
+}
+
+.abastecimentos-table__row strong {
+  overflow: hidden;
+  color: var(--dashboard-text);
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.abastecimentos-table__row small {
+  overflow: hidden;
+  margin-top: 4px;
+  color: var(--dashboard-text-soft);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.abastecimentos-table__value {
+  color: #8ff0c1 !important;
+}
+
+.abastecimentos-summary {
+  position: sticky;
+  top: 22px;
+  align-self: start;
+}
+
+.abastecimentos-kpi {
+  border-color: rgba(31, 210, 138, 0.16);
+  background: rgba(31, 210, 138, 0.07);
+}
+
+@media (max-width: 1180px) {
+  .abastecimentos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .abastecimentos-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 920px) {
+  .abastecimentos-table__head {
+    display: none;
+  }
+
+  .abastecimentos-table__row {
+    grid-template-columns: 1fr;
+  }
+}

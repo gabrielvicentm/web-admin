@@ -240,10 +240,6 @@ export function ViagemDetailPage() {
   const [motoristas, setMotoristas] = useState<MotoristaListItem[]>([])
   const [veiculos, setVeiculos] = useState<VeiculoListItem[]>([])
   const [tiposCarga, setTiposCarga] = useState<TipoCarga[]>([])
-  const [clienteSearch, setClienteSearch] = useState('')
-  const [motoristaSearch, setMotoristaSearch] = useState('')
-  const [veiculoSearch, setVeiculoSearch] = useState('')
-  const [tipoCargaSearch, setTipoCargaSearch] = useState('')
   const [timeline, setTimeline] = useState<ViagemTimelineItem[]>([])
   const [documentos, setDocumentos] = useState<ViagemDocumento[]>([])
   const [documentFiles, setDocumentFiles] = useState<File[]>([])
@@ -294,10 +290,10 @@ export function ViagemDetailPage() {
       setIsLoadingOptions(true)
 
       const [clientesResponse, motoristasResponse, veiculosResponse, tiposCargaResponse] = await Promise.all([
-        clienteService.list({ search: clienteSearch, page: 1, limit: 30 }),
-        motoristaService.list({ search: motoristaSearch, page: 1, limit: 30 }),
-        veiculoService.list({ search: veiculoSearch, page: 1, limit: 30 }),
-        tipoCargaService.list({ search: tipoCargaSearch, page: 1, limit: 30 }),
+        clienteService.list({ page: 1, limit: 100 }),
+        motoristaService.list({ page: 1, limit: 100 }),
+        veiculoService.list({ page: 1, limit: 100 }),
+        tipoCargaService.list({ page: 1, limit: 100 }),
       ])
 
       setClientes(clientesResponse.data)
@@ -309,7 +305,7 @@ export function ViagemDetailPage() {
     } finally {
       setIsLoadingOptions(false)
     }
-  }, [clienteSearch, motoristaSearch, tipoCargaSearch, veiculoSearch])
+  }, [])
 
   const loadViagem = useCallback(async () => {
     if (!id) {
@@ -611,15 +607,11 @@ export function ViagemDetailPage() {
                 <p>Cliente, motorista, veiculo e tipo de carga associados.</p>
               </div>
               <button className="entity-action entity-action--secondary" type="button" onClick={() => void loadOptions()}>
-                {isLoadingOptions ? 'Buscando...' : 'Atualizar buscas'}
+                {isLoadingOptions ? 'Carregando...' : 'Atualizar listas'}
               </button>
             </div>
 
             <div className="entity-form__grid entity-form__grid--4">
-              <label className="entity-field">
-                <span>Buscar cliente</span>
-                <input value={clienteSearch} onChange={(event) => setClienteSearch(event.target.value)} placeholder="Nome, documento ou e-mail" />
-              </label>
               <label className="entity-field">
                 <span>Cliente</span>
                 <select name="cliente_id" value={formData.cliente_id} onChange={handleChange} required>
@@ -633,10 +625,6 @@ export function ViagemDetailPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="entity-field">
-                <span>Buscar motorista</span>
-                <input value={motoristaSearch} onChange={(event) => setMotoristaSearch(event.target.value)} placeholder="Nome, CPF ou CNH" />
               </label>
               <label className="entity-field">
                 <span>Motorista</span>
@@ -653,10 +641,6 @@ export function ViagemDetailPage() {
                 </select>
               </label>
               <label className="entity-field">
-                <span>Buscar veiculo</span>
-                <input value={veiculoSearch} onChange={(event) => setVeiculoSearch(event.target.value)} placeholder="Placa, modelo ou marca" />
-              </label>
-              <label className="entity-field">
                 <span>Veiculo</span>
                 <select name="veiculo_id" value={formData.veiculo_id} onChange={handleChange} required>
                   <option value="">Selecione</option>
@@ -669,10 +653,6 @@ export function ViagemDetailPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="entity-field">
-                <span>Buscar tipo de carga</span>
-                <input value={tipoCargaSearch} onChange={(event) => setTipoCargaSearch(event.target.value)} placeholder="Nome ou descricao" />
               </label>
               <label className="entity-field">
                 <span>Tipo de carga</span>

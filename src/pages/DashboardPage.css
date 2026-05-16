@@ -300,6 +300,10 @@ body {
   gap: 24px;
 }
 
+.reports-page .dashboard-layout-grid {
+  align-items: start;
+}
+
 .dashboard-hero {
   display: flex;
   align-items: flex-start;
@@ -554,11 +558,167 @@ body {
 }
 
 .reports-builder,
+.reports-directory,
+.reports-main-column,
 .reports-sidepanel,
 .reports-preview,
 .reports-fleet {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+  align-content: start;
+  align-items: start;
+}
+
+.reports-main-column {
+  min-width: 0;
+}
+
+.reports-builder .dashboard-panel__header,
+.reports-directory .dashboard-panel__header,
+.reports-sidepanel .dashboard-panel__header,
+.reports-preview .dashboard-panel__header,
+.reports-fleet .dashboard-panel__header {
+  margin-bottom: 0;
+}
+
+.reports-backlink {
+  width: fit-content;
+  color: #8eb8ff;
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.reports-backlink:hover {
+  color: #b3ceff;
+}
+
+.reports-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.reports-directory-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  text-decoration: none;
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.reports-directory-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(126, 177, 255, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.reports-directory-card__icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.reports-directory-card--blue .reports-directory-card__icon {
+  background: rgba(76, 141, 255, 0.14);
+  color: #7fb1ff;
+}
+
+.reports-directory-card--cyan .reports-directory-card__icon {
+  background: rgba(51, 199, 255, 0.14);
+  color: #7adfff;
+}
+
+.reports-directory-card--green .reports-directory-card__icon {
+  background: rgba(31, 210, 138, 0.14);
+  color: #7de8ba;
+}
+
+.reports-directory-card--orange .reports-directory-card__icon {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd080;
+}
+
+.reports-directory-card__content strong {
+  display: block;
+  font-size: 1.04rem;
+}
+
+.reports-directory-card__content p {
+  margin: 8px 0 0;
+  color: var(--dashboard-text-soft);
+  line-height: 1.5;
+}
+
+.reports-directory-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reports-directory-card__chips span,
+.reports-directory-card__action {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.reports-directory-card__chips span {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--dashboard-text-soft);
+}
+
+.reports-directory-card__action {
+  background: rgba(76, 141, 255, 0.14);
+  color: #9ec2ff;
+}
+
+.reports-related {
+  display: grid;
+  gap: 12px;
+}
+
+.reports-related-list {
+  display: grid;
+  gap: 10px;
+}
+
+.reports-related-link {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--dashboard-text);
+  text-decoration: none;
+  transition: background 0.22s ease, transform 0.22s ease;
+}
+
+.reports-related-link:hover {
+  transform: translateY(-1px);
+  background: rgba(76, 141, 255, 0.08);
+}
+
+.reports-related-link strong {
+  font-size: 0.96rem;
+}
+
+.reports-related-link span {
+  color: var(--dashboard-text-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .reports-fleet-grid {
@@ -601,13 +761,31 @@ body {
 .reports-filters-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px 16px;
 }
 
 .reports-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.reports-builder .entity-field input,
+.reports-builder .entity-field select {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.reports-builder .entity-field {
+  gap: 6px;
+}
+
+.reports-actions .entity-action {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
 }
 
 .reports-preview-table {
@@ -757,6 +935,10 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .reports-directory-grid {
+    grid-template-columns: 1fr;
+  }
+
   .reports-fleet-grid {
     grid-template-columns: 1fr;
   }
@@ -886,18 +1068,63 @@ body {
 
 .history-toolbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(7, minmax(130px, 0.72fr)) auto auto;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(6, minmax(130px, 0.72fr)) auto auto;
   gap: 14px;
   align-items: end;
   padding: 18px;
   border: 1px solid var(--dashboard-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  background:
+    radial-gradient(circle at top right, rgba(76, 141, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
   box-shadow: var(--dashboard-shadow);
 }
 
 .history-toolbar__field--wide {
   min-width: 0;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.history-summary-card {
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(14, 24, 40, 0.98), rgba(10, 18, 31, 0.98));
+  box-shadow: var(--dashboard-shadow);
+}
+
+.history-summary-card span,
+.history-summary-card small {
+  display: block;
+  color: var(--dashboard-text-soft);
+}
+
+.history-summary-card strong {
+  display: block;
+  margin: 10px 0 8px;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.history-summary-card--blue strong {
+  color: #9ec2ff;
+}
+
+.history-summary-card--green strong {
+  color: #97f0c8;
+}
+
+.history-summary-card--cyan strong {
+  color: #89e7ff;
+}
+
+.history-summary-card--orange strong {
+  color: #ffd392;
 }
 
 .entity-toolbar--compact {
@@ -1118,14 +1345,29 @@ body {
 
 .history-row {
   width: 100%;
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  background: transparent;
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
   color: var(--dashboard-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.history-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(76, 141, 255, 0.18);
+  background: rgba(76, 141, 255, 0.05);
+}
+
+.history-row.is-selected {
+  border-color: rgba(76, 141, 255, 0.28);
+  background: linear-gradient(90deg, rgba(76, 141, 255, 0.1), rgba(76, 141, 255, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(76, 141, 255, 0.12);
 }
 
 .entity-table__main--motoristas {
@@ -1249,6 +1491,39 @@ body {
   align-content: center;
   gap: 6px;
   min-width: 0;
+}
+
+.history-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.history-badge--success {
+  background: rgba(31, 210, 138, 0.14);
+  color: #9af0ca;
+}
+
+.history-badge--info {
+  background: rgba(76, 141, 255, 0.14);
+  color: #a6c7ff;
+}
+
+.history-badge--warning {
+  background: rgba(255, 177, 59, 0.14);
+  color: #ffd392;
+}
+
+.history-badge--neutral {
+  background: rgba(255, 255, 255, 0.07);
+  color: #dbe6f8;
 }
 
 .entity-table__cell--status {
@@ -1475,6 +1750,12 @@ body {
 
 .entity-detail-grid strong {
   color: var(--dashboard-text);
+}
+
+.history-detail-grid {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .entity-metric-list {
@@ -1721,6 +2002,7 @@ body {
   gap: 12px;
   padding: 14px 16px;
   border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1870,6 +2152,10 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .history-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .history-toolbar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1935,6 +2221,10 @@ body {
   .entity-table__row--viagens,
   .entity-table__row--manutencoes,
   .entity-table__row--historico {
+    grid-template-columns: 1fr;
+  }
+
+  .history-summary-grid {
     grid-template-columns: 1fr;
   }
 

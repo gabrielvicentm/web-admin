@@ -1,83 +1,172 @@
+import { useEffect, useMemo, useState } from 'react'
 import {
   AlertIcon,
   FuelIcon,
+  ListIcon,
   PayrollIcon,
   ReportIcon,
   RouteIcon,
   TruckIcon,
   UserBadgeIcon,
-  UsersIcon,
   WrenchIcon,
 } from '../components/dashboard/DashboardIcons'
+import { dashboardService, type DashboardSnapshot } from '../services/dashboardService'
 
-const summaryCards = [
-  { title: 'Total de viagens', value: '128', hint: '12 viagens iniciadas hoje', tone: 'blue', icon: RouteIcon },
-  { title: 'Veiculos em uso', value: '34', hint: '6 indisponiveis no momento', tone: 'cyan', icon: TruckIcon },
-  { title: 'Motoristas ativos', value: '52', hint: '4 com vencimentos proximos', tone: 'green', icon: UserBadgeIcon },
-  { title: 'Alertas e pendencias', value: '9', hint: '3 itens exigem acao imediata', tone: 'orange', icon: AlertIcon },
-]
+function formatCurrency(value?: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value ?? 0))
+}
 
-const quickActions = [
-  { title: 'Nova viagem', description: 'Cadastrar rota e equipe de atendimento', icon: RouteIcon },
-  { title: 'Novo veiculo', description: 'Adicionar frota e documentacao', icon: TruckIcon },
-  { title: 'Novo funcionario', description: 'Registrar colaborador administrativo', icon: UsersIcon },
-  { title: 'Novo motorista', description: 'Vincular condutor e categorias', icon: UserBadgeIcon },
-]
+function formatNumber(value?: number, suffix = '') {
+  const formatted = new Intl.NumberFormat('pt-BR').format(Number(value ?? 0))
+  return suffix ? `${formatted} ${suffix}` : formatted
+}
 
-const alertColumns = [
-  {
-    title: 'Alertas operacionais',
-    items: [
-      '3 viagens aguardando liberacao de carga',
-      '2 motoristas com CNH vencendo nesta semana',
-      '1 ocorrencia aberta sem responsavel definido',
-    ],
-  },
-  {
-    title: 'Manutencoes e abastecimentos',
-    items: [
-      'Revisao preventiva do veiculo GHI-9012 agendada para amanha',
-      'Abastecimento acima da media no veiculo ABC-1234',
-      'Troca de pneus pendente em 2 veiculos',
-    ],
-  },
-]
+function formatPercent(value?: number) {
+  return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(Number(value ?? 0))}%`
+}
 
-const activities = [
-  { vehicle: 'ABC-1234', driver: 'Carlos Silva', route: 'Fortaleza > Recife', status: 'Em rota' },
-  { vehicle: 'JKL-3456', driver: 'Ana Costa', route: 'Salvador > Maceio', status: 'Carregando' },
-  { vehicle: 'MNO-7890', driver: 'Joao Pedro', route: 'Sao Luis > Teresina', status: 'Em conferencia' },
-  { vehicle: 'QRS-1122', driver: 'Maria Oliveira', route: 'Natal > Joao Pessoa', status: 'Concluida' },
-]
+function formatStatusLabel(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
 
-const panels = [
-  {
-    title: 'Resumo financeiro',
-    metric: 'R$ 18.420,00',
-    description: 'Custos operacionais registrados hoje',
-    icon: PayrollIcon,
-  },
-  {
-    title: 'Relatorios gerenciais',
-    metric: '14',
-    description: 'Relatorios prontos para exportacao',
-    icon: ReportIcon,
-  },
-  {
-    title: 'Saude da frota',
-    metric: '91%',
-    description: 'Disponibilidade media da operacao',
-    icon: WrenchIcon,
-  },
-  {
-    title: 'Abastecimentos',
-    metric: '23',
-    description: 'Lancamentos validados nas ultimas 24h',
-    icon: FuelIcon,
-  },
-]
+function formatUpdatedAt(value?: string) {
+  if (!value) {
+    return 'Atualizacao indisponivel'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return `Atualizado em ${new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date)}`
+}
 
 export function DashboardHome() {
+  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadSnapshot() {
+      try {
+        setIsLoading(true)
+        setErrorMessage('')
+        const response = await dashboardService.getSnapshot()
+
+        if (isActive) {
+          setSnapshot(response.data)
+        }
+      } catch {
+        if (isActive) {
+          setErrorMessage('Nao foi possivel carregar os indicadores do dashboard.')
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadSnapshot()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  const summaryCards = useMemo(() => {
+    if (!snapshot) {
+      return []
+    }
+
+    return [
+      {
+        title: 'Viagens atrasadas',
+        value: formatNumber(snapshot.summary.viagens_atrasadas),
+        hint: `${formatNumber(snapshot.summary.viagens_em_andamento)} em rota e ${formatNumber(snapshot.summary.viagens_pendentes)} pendentes`,
+        tone: 'orange',
+        icon: RouteIcon,
+      },
+      {
+        title: 'Finalizacoes pendentes',
+        value: formatNumber(snapshot.metrics.finalizacoes_pendentes),
+        hint: `${formatNumber(snapshot.metrics.paradas_abertas)} paradas abertas exigindo retorno`,
+        tone: 'blue',
+        icon: ListIcon,
+      },
+      {
+        title: 'Frota indisponivel',
+        value: formatNumber(snapshot.summary.veiculos_indisponiveis),
+        hint: `${formatNumber(snapshot.summary.manutencoes_em_andamento)} manutencoes em andamento`,
+        tone: 'cyan',
+        icon: TruckIcon,
+      },
+      {
+        title: 'Alertas criticos',
+        value: formatNumber(snapshot.summary.alertas_pendencias_total),
+        hint: `${formatNumber(snapshot.summary.alertas_criticos_total)} vencem em ate 7 dias`,
+        tone: 'green',
+        icon: UserBadgeIcon,
+      },
+    ]
+  }, [snapshot])
+
+  const panels = useMemo(() => {
+    if (!snapshot) {
+      return []
+    }
+
+    return [
+      {
+        title: 'Custo operacional hoje',
+        metric: formatCurrency(snapshot.metrics.gasto_operacional_hoje),
+        description: `Abastecimento ${formatCurrency(snapshot.metrics.gasto_abastecimento_hoje)} + manutencao ${formatCurrency(snapshot.metrics.gasto_manutencao_hoje)}`,
+        icon: PayrollIcon,
+      },
+      {
+        title: 'Despacho e entrega',
+        metric: formatNumber(snapshot.metrics.viagens_concluidas_hoje),
+        description: `${formatNumber(snapshot.summary.viagens_hoje)} saidas hoje e ${formatNumber(snapshot.summary.viagens_pendentes)} aguardando despacho`,
+        icon: ReportIcon,
+      },
+      {
+        title: 'Disponibilidade da frota',
+        metric: formatPercent(snapshot.metrics.disponibilidade_frota),
+        description: `${formatNumber(snapshot.summary.veiculos_em_uso)} em uso e ${formatNumber(snapshot.summary.veiculos_indisponiveis)} indisponiveis`,
+        icon: WrenchIcon,
+      },
+      {
+        title: 'Abastecimentos e ocorrencias',
+        metric: formatNumber(snapshot.metrics.abastecimentos_hoje),
+        description: `${formatNumber(snapshot.metrics.ocorrencias_hoje)} ocorrencias registradas e ${formatNumber(snapshot.metrics.paradas_abertas)} paradas abertas`,
+        icon: FuelIcon,
+      },
+    ]
+  }, [snapshot])
+
+  const alertColumns = useMemo(() => {
+    if (!snapshot) {
+      return []
+    }
+
+    return [
+      {
+        title: 'Alertas operacionais',
+        items: snapshot.alerts.operational,
+      },
+      {
+        title: 'Frota e documentacao',
+        items: snapshot.alerts.fleet,
+      },
+    ]
+  }, [snapshot])
+
   return (
     <div className="dashboard-home">
       <section className="dashboard-hero">
@@ -90,10 +179,15 @@ export function DashboardHome() {
         </div>
         <div className="dashboard-chip-row">
           <span className="dashboard-chip dashboard-chip--success">Sistema online</span>
-          <span className="dashboard-chip">Atualizado ha 2 min</span>
+          <span className="dashboard-chip">{formatUpdatedAt(snapshot?.updated_at)}</span>
         </div>
       </section>
 
+      {errorMessage ? <p className="entity-feedback entity-feedback--error">{errorMessage}</p> : null}
+      {isLoading ? <section className="entity-empty-state">Carregando dashboard...</section> : null}
+
+      {!isLoading && snapshot ? (
+        <>
       <section className="dashboard-summary-grid">
         {summaryCards.map(({ title, value, hint, tone, icon: Icon }) => (
           <article className={`dashboard-card dashboard-card--${tone}`} key={title}>
@@ -110,32 +204,11 @@ export function DashboardHome() {
       </section>
 
       <section className="dashboard-layout-grid">
-        <article className="dashboard-panel dashboard-panel--span-8">
-          <header className="dashboard-panel__header">
-            <div>
-              <h2>Atalhos rapidos</h2>
-              <p>Fluxos mais usados para manter a operacao em movimento.</p>
-            </div>
-          </header>
-
-          <div className="dashboard-shortcuts">
-            {quickActions.map(({ title, description, icon: Icon }) => (
-              <button className="dashboard-shortcut" key={title} type="button">
-                <span className="dashboard-shortcut__icon">
-                  <Icon width={20} height={20} />
-                </span>
-                <strong>{title}</strong>
-                <span>{description}</span>
-              </button>
-            ))}
-          </div>
-        </article>
-
-        <article className="dashboard-panel dashboard-panel--span-4">
+        <article className="dashboard-panel dashboard-panel--span-12">
           <header className="dashboard-panel__header">
             <div>
               <h2>Indicadores</h2>
-              <p>Blocos prontos para leitura rapida da equipe.</p>
+              <p>Leitura consolidada da operacao, frota e custos do dia.</p>
             </div>
           </header>
 
@@ -190,17 +263,26 @@ export function DashboardHome() {
               <span>Rota</span>
               <span>Status</span>
             </div>
-            {activities.map((activity) => (
-              <div className="dashboard-table__row" key={`${activity.vehicle}-${activity.driver}`}>
+            {snapshot.activities.length === 0 ? (
+              <div className="dashboard-table__row">
+                <span>Nenhum</span>
+                <span>Sem viagens</span>
+                <span>Nao ha operacoes em andamento</span>
+                <span className="dashboard-status-pill">Sem dados</span>
+              </div>
+            ) : snapshot.activities.map((activity) => (
+              <div className="dashboard-table__row" key={activity.id}>
                 <span>{activity.vehicle}</span>
                 <span>{activity.driver}</span>
                 <span>{activity.route}</span>
-                <span className="dashboard-status-pill">{activity.status}</span>
+                <span className="dashboard-status-pill">{formatStatusLabel(activity.status)}</span>
               </div>
             ))}
           </div>
         </article>
       </section>
+        </>
+      ) : null}
     </div>
   )
 }

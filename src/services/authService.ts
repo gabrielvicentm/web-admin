@@ -8,6 +8,20 @@ type AdminLoginPayload = {
   senha: string
 }
 
+type ResetPasswordPayload = {
+  token: string
+  nova_senha: string
+}
+
+type AdminGeneratePasswordResetTokenPayload = {
+  email: string
+}
+
+type AdminGeneratePasswordResetTokenResponse = {
+  token: string
+  expires_at: string
+}
+
 type LoginResponse = {
   access_token: string
   refresh_token?: string
@@ -63,6 +77,27 @@ export const authService = {
       return session
     } catch (error) {
       throw new Error(getLoginErrorMessage(error))
+    }
+  },
+
+  async resetPassword(payload: ResetPasswordPayload) {
+    try {
+      const response = await api.post<{ message?: string }>('auth/reset-password', payload)
+      return response.data
+    } catch (error) {
+      throw new Error(getHttpErrorMessage(error, 'Nao foi possivel redefinir a senha.'))
+    }
+  },
+
+  async generateAdminPasswordResetToken(payload: AdminGeneratePasswordResetTokenPayload) {
+    try {
+      const response = await api.post<{ data: AdminGeneratePasswordResetTokenResponse; message?: string }>(
+        'admin/usuarios/password-reset-token',
+        payload,
+      )
+      return response.data
+    } catch (error) {
+      throw new Error(getHttpErrorMessage(error, 'Nao foi possivel gerar o token de redefinicao.'))
     }
   },
 

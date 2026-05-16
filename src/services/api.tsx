@@ -59,6 +59,7 @@ function isBypassAuthRequest(url?: string) {
     || normalizedUrl === 'auth/motorista/login'
     || normalizedUrl === 'auth/refresh'
     || normalizedUrl === 'auth/logout'
+    || normalizedUrl === 'auth/reset-password'
   )
 }
 
