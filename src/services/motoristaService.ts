@@ -62,19 +62,23 @@ export type MotoristaIndicadores = {
 
 export type MotoristaHistoricoViagem = {
   id: number
-  origem?: string
-  destino?: string
+  origem_cidade?: string
+  origem_uf?: string
+  destino_cidade?: string
+  destino_uf?: string
   status?: string
   data_saida?: string
-  data_chegada?: string
+  data_chegada_prevista?: string
+  valor_frete?: number
 }
 
 export type MotoristaOcorrencia = {
   id: number
-  titulo?: string
+  tipo?: string
   descricao?: string
-  status?: string
-  data_ocorrencia?: string
+  latitude?: number
+  longitude?: number
+  registrado_em?: string
 }
 
 type ListMotoristasParams = {

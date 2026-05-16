@@ -1038,7 +1038,7 @@ body {
 
 .entity-table__head--motoristas,
 .entity-table__row--motoristas {
-  grid-template-columns: minmax(0, 1.8fr) minmax(180px, 1fr) minmax(200px, 1.05fr) 120px 140px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(180px, 0.95fr) minmax(200px, 1fr) 120px minmax(236px, 0.96fr);
 }
 
 .entity-table__head--veiculos,
@@ -1129,7 +1129,7 @@ body {
 }
 
 .entity-table__main--motoristas {
-  grid-template-columns: minmax(0, 1.8fr) minmax(180px, 1fr) minmax(200px, 1.05fr) 120px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(180px, 0.95fr) minmax(200px, 1fr) 120px;
   grid-column: 1 / span 4;
 }
 
@@ -1213,10 +1213,13 @@ body {
 
 .entity-table__actions--motoristas {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   justify-items: stretch;
   align-content: center;
-  gap: 12px;
+  gap: 8px;
   grid-column: 5;
+  justify-self: center;
+  width: min(100%, 236px);
 }
 
 .entity-table__actions--veiculos {
@@ -1236,6 +1239,9 @@ body {
 
 .entity-table__actions--motoristas > * {
   justify-content: center;
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 0.88rem;
 }
 
 .entity-table__cell {
@@ -1566,6 +1572,13 @@ body {
   align-items: start;
 }
 
+.motorista-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.78fr);
+  gap: 18px;
+  align-items: start;
+}
+
 .vehicle-history-toolbar {
   grid-template-columns: repeat(2, minmax(180px, 0.5fr)) auto;
 }
@@ -1575,9 +1588,35 @@ body {
   gap: 12px;
 }
 
+.motorista-history-stack {
+  display: grid;
+  gap: 12px;
+}
+
 .vehicle-history-stack small {
   display: block;
   margin-top: 8px;
+  color: var(--dashboard-text-soft);
+}
+
+.motorista-history-stack small {
+  display: block;
+  margin-top: 8px;
+  color: var(--dashboard-text-soft);
+}
+
+.motorista-profile {
+  display: grid;
+  gap: 18px;
+}
+
+.motorista-profile__meta {
+  display: grid;
+  gap: 6px;
+}
+
+.motorista-profile__meta p {
+  margin: 0;
   color: var(--dashboard-text-soft);
 }
 
@@ -1840,6 +1879,10 @@ body {
   }
 
   .vehicle-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-detail-layout {
     grid-template-columns: 1fr;
   }
 

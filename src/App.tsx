@@ -15,6 +15,7 @@ import { ManutencaoFormPage } from './pages/ManutencaoFormPage'
 import { ManutencoesHistoricoPage } from './pages/ManutencoesHistoricoPage'
 import { ManutencoesListPage } from './pages/ManutencoesListPage'
 import { MotoristaFormPage } from './pages/MotoristaFormPage'
+import { MotoristaDetailPage } from './pages/MotoristaDetailPage'
 import { MotoristasListPage } from './pages/MotoristasListPage'
 import { RelatoriosPage } from './pages/RelatoriosPage'
 import { SectionPage } from './pages/SectionPage'
@@ -56,6 +57,7 @@ function App() {
           <Route path="funcionarios/:id/editar" element={<FuncionarioFormPage />} />
           <Route path="motoristas/listar" element={<MotoristasListPage />} />
           <Route path="motoristas/novo" element={<MotoristaFormPage />} />
+          <Route path="motoristas/:id/detalhes" element={<MotoristaDetailPage />} />
           <Route path="motoristas/:id/editar" element={<MotoristaFormPage />} />
           <Route path="manutencoes/listar" element={<ManutencoesListPage />} />
           <Route path="manutencoes/nova" element={<ManutencaoFormPage />} />

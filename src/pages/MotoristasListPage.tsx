@@ -227,6 +227,9 @@ export function MotoristasListPage() {
                     </span>
                   </div>
                   <span className="entity-table__actions entity-table__actions--motoristas">
+                    <Link className="entity-action entity-action--ghost" to={`/dashboard/motoristas/${item.id}/detalhes`}>
+                      Detalhes
+                    </Link>
                     <Link className="entity-action entity-action--ghost" to={`/dashboard/motoristas/${item.id}/editar`}>
                       Editar
                     </Link>
