@@ -123,6 +123,10 @@ async function ensureAccessToken(forceRefresh = false) {
   return refreshRequest
 }
 
+export async function getValidAccessToken(forceRefresh = false) {
+  return ensureAccessToken(forceRefresh)
+}
+
 export function attachAuthInterceptors(client: AxiosInstance) {
   client.interceptors.request.use(async (config) => {
     if (isBypassAuthRequest(config.url)) {

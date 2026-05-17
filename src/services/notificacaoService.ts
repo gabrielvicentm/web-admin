@@ -1,5 +1,5 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source'
-import { api } from './api'
+import { api, getValidAccessToken } from './api'
 import type { PaginatedApiResponse } from './httpTypes'
 import { sessionService } from './sessionService'
 
@@ -45,12 +45,24 @@ export const notificacaoService = {
   },
 
   async subscribeAdmin({ signal, onNotification }: SubscribeOptions) {
-    const token = sessionService.getAccessToken()
+    const token = await getValidAccessToken()
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined
 
     await fetchEventSource(getApiUrl('/admin/notificacoes/stream'), {
       headers,
       signal,
+      async onopen(response) {
+        if (response.ok) {
+          return
+        }
+
+        if (response.status === 401) {
+          sessionService.clearSession()
+          throw new Error('Sessao expirada ao conectar notificacoes.')
+        }
+
+        throw new Error(`Falha ao conectar stream de notificacoes (${response.status}).`)
+      },
       onmessage(event) {
         if (event.event !== 'notificacao' || !event.data) {
           return

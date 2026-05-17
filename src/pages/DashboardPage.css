@@ -1864,6 +1864,11 @@ body {
   grid-template-columns: repeat(2, minmax(180px, 0.5fr)) auto;
 }
 
+.motorista-detail-layout .vehicle-history-toolbar {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .vehicle-history-stack {
   display: grid;
   gap: 12px;
